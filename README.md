@@ -12,7 +12,8 @@ $ npm install --save boxed-injector
 ```js
 var boxedInjector = require('boxed-injector');
 
-boxedInjector('Rainbow');
+Documentation coming soon.
+
 ```
 ## License
 
