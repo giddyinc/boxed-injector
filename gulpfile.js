@@ -13,7 +13,7 @@ var isparta = require('isparta');
 
 // Initialize the babel transpiler so ES2015 files gets compiled
 // when they're loaded
-require('babel-register');
+require('babel-register')();
 
 gulp.task('static', function () {
   return gulp.src('**/*.js')
@@ -28,7 +28,7 @@ gulp.task('nsp', function (cb) {
 });
 
 gulp.task('pre-test', function () {
-  return gulp.src('lib/**/*.js')
+  return gulp.src(['lib/**/*.js', '!lib/**/*.test.js'])
     .pipe(excludeGitignore())
     .pipe(istanbul({
       includeUntested: true,
@@ -37,22 +37,23 @@ gulp.task('pre-test', function () {
     .pipe(istanbul.hookRequire());
 });
 
-gulp.task('test', ['pre-test'], function (cb) {
-  var mochaErr;
+gulp.task('test', ['pre-test'], function () {
+  // var mochaErr;
 
-  gulp.src('test/**/*.js')
+  return gulp.src(['lib/**/*.test.js', 'test/**/*.js'])
     .pipe(plumber())
     .pipe(mocha({reporter: 'spec'}))
-    .on('error', function (err) {
-      mochaErr = err;
-    })
-    .pipe(istanbul.writeReports())
-    .on('end', function () {
+    // .on('error', function (err) {
+    //   mochaErr = err;
+    // })
+    .pipe(istanbul.writeReports());
+/*    .on('end', function () {
       cb(mochaErr);
     });
+    */
 });
 
-gulp.task('watch', function () {
+gulp.task('watch', ['test'], function () {
   gulp.watch(['lib/**/*.js', 'test/**'], ['test']);
 });
 
