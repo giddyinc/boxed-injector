@@ -1,0 +1,47 @@
+{
+  "name": "@boxed/boxed-injector",
+  "version": "0.0.0",
+  "description": "Dependency Injection Tools",
+  "homepage": "",
+  "author": {
+    "name": "Ben Lugavere",
+    "email": "ben@boxed.com",
+    "url": ""
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "dist/index.js",
+  "keywords": [
+    "injector",
+    "injection",
+    "di",
+    "dependency injection"
+  ],
+  "devDependencies": {
+    "eslint": "^3.1.1",
+    "eslint-config-xo-space": "^0.15.0",
+    "babel-eslint": "^6.1.2",
+    "eslint-plugin-babel": "^3.3.0",
+    "gulp": "^3.9.0",
+    "gulp-eslint": "^3.0.1",
+    "gulp-exclude-gitignore": "^1.0.0",
+    "gulp-line-ending-corrector": "^1.0.1",
+    "gulp-istanbul": "^1.0.0",
+    "gulp-mocha": "^3.0.1",
+    "gulp-plumber": "^1.0.0",
+    "gulp-nsp": "^2.1.0",
+    "gulp-coveralls": "^0.1.0",
+    "gulp-babel": "^6.1.2",
+    "del": "^2.0.2",
+    "babel-core": "^6.11.4",
+    "babel-register": "^6.9.0",
+    "babel-preset-es2015": "6.9.0",
+    "isparta": "^4.0.0"
+  },
+  "repository": "giddyinc/boxed-injector",
+  "scripts": {
+    "prepublish": "gulp prepublish",
+    "test": "gulp"
+  }
+}
