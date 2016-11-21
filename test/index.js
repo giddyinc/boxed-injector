@@ -1,5 +1,3 @@
-// import assert from 'assert';
-// import boxedInjector from '../lib';
 
 'use strict';
 
