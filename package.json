@@ -1,11 +1,11 @@
 {
-  "name": "@boxed/boxed-injector",
+  "name": "boxed-injector",
   "version": "0.2.1",
   "description": "Dependency Injection Tools",
   "homepage": "",
   "author": {
     "name": "Ben Lugavere",
-    "email": "ben@boxed.com",
+    "email": "b.lugavere@gmail.com",
     "url": ""
   },
   "files": [
@@ -19,10 +19,6 @@
     "dependency injection"
   ],
   "devDependencies": {
-    "@types/expect": "^1.13.30",
-    "@types/gulp": "^3.8.32",
-    "@types/mocha": "^2.2.32",
-    "@types/node": "^6.0.46",
     "babel-core": "^6.11.4",
     "babel-eslint": "^7.0.0",
     "babel-loader": "^6.2.5",
