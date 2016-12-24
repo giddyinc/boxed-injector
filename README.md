@@ -83,10 +83,31 @@ console.log(carFactory === sameCarFactory);
 
 // injector.get('whatever');
 
+```
+
+## Middleware
 
 
+## Static Typing / Interfaces
+
+
+## Create - coming soon
+
+Resolves a factories dependencies and then instantiates an instance with the given args.
+
+```js
+
+function Engine() {}
+function Car(engine, color) { this.engine = engine; this.color = color; }
+Car.inject = ['Engine'];
+injector.factory('Engine', Engine);
+injector.factory('Car', Car);
+const car = injector.create('Car', 'blue');
+
+// { engine, engine, color: 'blue' }
 
 ```
+
 
 ## Contributing
 We look forward to seeing your contributions!
