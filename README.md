@@ -91,9 +91,9 @@ console.log(carFactory === sameCarFactory);
 ## Static Typing / Interfaces
 
 
-## Create - coming soon
+## Create
 
-Resolves a factories dependencies and then instantiates an instance with the given args.
+Resolves a factory's dependencies and then instantiates an instance with the given args.
 
 ```js
 
@@ -102,7 +102,7 @@ function Car(engine, color) { this.engine = engine; this.color = color; }
 Car.inject = ['Engine'];
 injector.factory('Engine', Engine);
 injector.factory('Car', Car);
-const car = injector.create('Car', 'blue');
+const car = injector.create('Car', ['blue']);
 
 // { engine, engine, color: 'blue' }
 
