@@ -133,11 +133,6 @@ Usage:
 ## Contributing
 We look forward to seeing your contributions!
 
-
-## Prior Art
-Inspiration
-- [BottleJS](https://github.com/young-steveo/bottlejs)
-
 ## License
 
 MIT © [Ben Lugavere]()
