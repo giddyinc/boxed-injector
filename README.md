@@ -85,9 +85,6 @@ console.log(carFactory === sameCarFactory);
 
 ```
 
-## Middleware
-
-
 ## Static Typing / Interfaces
 
 
