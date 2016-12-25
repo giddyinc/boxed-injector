@@ -105,19 +105,19 @@ Usage:
 
 ```js
 
-  // will console log name before getting every instance from the container
+  // will console log before getting any instance from the container
   injector.middleware(entity => console.log('before global');
   // will console log 'baz' before getting baz from the container - will always run after global above
   injector.middleware('baz', entity => console.log(entity.name);
-  // will console log name for all, but will run after baz is logged
-  injector.middleware(entity => console.log('before global again');
+  // will console log for any instance, but will run after baz and above global is logged 
+  injector.middleware(entity => console.log(`before global again - resolving ${entity.name}`);
 
   injector.register('baz', result);
 
-  // will console log name AFTER getting every instance from the container
-  injector.middleware(entity => console.log(entity.name);
+  // will console log AFTER getting any instance from the container
+  injector.middleware(() => console.log('after global');
   // will console log 'baz' AFTER getting baz from the container - will always run after global above
-  injector.middleware('baz', entity => console.log('after global');
+  injector.middleware('baz', entity => console.log(entity.name);
 
   injector.get('baz');
 
