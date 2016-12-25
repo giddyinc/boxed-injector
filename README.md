@@ -87,9 +87,46 @@ console.log(carFactory === sameCarFactory);
 ```
 
 ## Middleware
-Middleware functions are executed every time a service is accessed from the container. They are passed the service instance and a next function.
+Middleware functions are executed every time a service is accessed from the container (or on a factory, the first time it's accessed). 
+Global middleware as well as service/factory specific middleware is supported and is executed in the order of registry (FIFO).
+Note that registered instances are singletons and mutations will affect all consumers.
+Middleware is synchronous, and is passed an object as follows:
+
+```json
+{
+  name: 'ExampleService',
+  depends: ['ThingItsDependentOn', 'OtherThing'],
+  instance: { thing: {}, other: {} }, //fully instantiated instance,
+  factory: ExampleService // factory
+}
+```
+
+Usage:
 
 ```js
+
+  // will console log name before getting every instance from the container
+  injector.middleware(entity => console.log('before global');
+  // will console log 'baz' before getting baz from the container - will always run after global above
+  injector.middleware('baz', entity => console.log(entity.name);
+  // will console log name for all, but will run after baz is logged
+  injector.middleware(entity => console.log('before global again');
+
+  injector.register('baz', result);
+
+  // will console log name AFTER getting every instance from the container
+  injector.middleware(entity => console.log(entity.name);
+  // will console log 'baz' AFTER getting baz from the container - will always run after global above
+  injector.middleware('baz', entity => console.log('after global');
+
+  injector.get('baz');
+
+  // -> before global
+  // -> baz
+  // -> before global again
+  // instance returned
+  // -> baz
+  // -> after global  
 
 ```
 
