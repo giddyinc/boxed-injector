@@ -92,7 +92,7 @@ Global middleware as well as service/factory specific middleware is supported an
 Note that registered instances are singletons and mutations will affect all consumers.
 Middleware is synchronous, and is passed an object as follows:
 
-```json
+```js
 {
   name: 'ExampleService',
   depends: ['ThingItsDependentOn', 'OtherThing'],
