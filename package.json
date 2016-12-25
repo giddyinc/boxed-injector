@@ -51,7 +51,8 @@
     "gulp-nsp": "^2.1.0",
     "gulp-plumber": "^1.0.0",
     "isparta": "^4.0.0",
-    "react-addons-test-utils": "^15.3.2"
+    "react-addons-test-utils": "^15.3.2",
+    "sinon": "^1.17.6"
   },
   "repository": "giddyinc/boxed-injector",
   "scripts": {

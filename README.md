@@ -84,12 +84,22 @@ console.log(carFactory === sameCarFactory);
 // injector.get('whatever');
 
 
+```
 
+## Middleware
+Middleware functions are executed every time a service is accessed from the container. They are passed the service instance and a next function.
+
+```js
 
 ```
 
 ## Contributing
 We look forward to seeing your contributions!
+
+
+## Prior Art
+Inspiration
+- [BottleJS](https://github.com/young-steveo/bottlejs)
 
 ## License
 

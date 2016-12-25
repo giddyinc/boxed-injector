@@ -42,7 +42,7 @@ gulp.task('test', ['pre-test'], function () {
 
   return gulp.src(['lib/**/*.test.js', 'test/**/*.js'])
     .pipe(plumber())
-    .pipe(mocha({reporter: 'spec'}))
+    .pipe(mocha({reporter: 'nyan'}))
     // .on('error', function (err) {
     //   mochaErr = err;
     // })
