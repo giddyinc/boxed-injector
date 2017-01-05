@@ -8,6 +8,7 @@
     "transform-object-rest-spread",
     "transform-class-properties",
     "transform-decorators-legacy",
-    "transform-object-assign"
+    "transform-object-assign",
+    "array-includes"
   ]
 }
