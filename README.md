@@ -1,4 +1,4 @@
-# boxed-injector [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][https://travis-ci.org/giddyinc/boxed-injector] [![Dependency Status][daviddm-image]][daviddm-url] [![Coverage Status](https://coveralls.io/repos/github/giddyinc/boxed-injector/badge.svg?branch=master)](https://coveralls.io/github/giddyinc/boxed-injector?branch=master)
+# boxed-injector [![NPM version][npm-image]][npm-url] [![Build Status](https://travis-ci.org/giddyinc/boxed-injector.svg?branch=master)](https://travis-ci.org/giddyinc/boxed-injector) [![Dependency Status][daviddm-image]][daviddm-url] [![Coverage Status](https://coveralls.io/repos/github/giddyinc/boxed-injector/badge.svg?branch=master)](https://coveralls.io/github/giddyinc/boxed-injector?branch=master)
 > Dependency Injection Tools
 
 ## Installation
