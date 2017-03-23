@@ -85,6 +85,17 @@ console.log(carFactory === sameCarFactory);
 
 
 ```
+## Create
+Resolves a factory's dependencies and then instantiates an instance with the given args. Will call the constructor (new) on a registered instance that is a function.
+```js
+function Engine() {}
+function Car(engine, color) { this.engine = engine; this.color = color; }
+Car.inject = ['Engine'];
+injector.factory('Engine', Engine);
+injector.factory('Car', Car);
+const car = injector.create('Car', ['blue']);
+// { engine, engine, color: 'blue' }
+```
 
 ## Middleware
 Middleware functions are executed every time a service is accessed from the container (or on a factory, the first time it's accessed). 
