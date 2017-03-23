@@ -1,4 +1,4 @@
-{
+module.exports = {
   "extends": "xo-space",
   "env": {
     "mocha": true
@@ -16,6 +16,7 @@
   ],
   "rules": {
     "guard-for-in": [0],
-    "react/jsx-uses-vars": "error"
+    "react/jsx-uses-vars": "error",
+    "no-multiple-empty-lines": 1
   }
 }
