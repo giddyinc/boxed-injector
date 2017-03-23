@@ -1,4 +1,4 @@
-# boxed-injector [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url] [![Coverage percentage][coveralls-image]][coveralls-url]
+# boxed-injector [![NPM version][npm-image]][npm-url] [![Build Status](https://travis-ci.org/giddyinc/boxed-injector.svg?branch=master)](https://travis-ci.org/giddyinc/boxed-injector) [![Dependency Status][daviddm-image]][daviddm-url] [![Coverage Status](https://coveralls.io/repos/github/giddyinc/boxed-injector/badge.svg?branch=master)](https://coveralls.io/github/giddyinc/boxed-injector?branch=master)
 > Dependency Injection Tools
 
 ## Installation
@@ -83,28 +83,52 @@ console.log(carFactory === sameCarFactory);
 
 // injector.get('whatever');
 
+
 ```
 
-## Static Typing / Interfaces
+## Middleware
+Middleware functions are executed every time a service is accessed from the container (or on a factory, the first time it's accessed). 
+Global middleware as well as service/factory specific middleware is supported and is executed in the order of registry (FIFO).
+Note that registered instances are singletons and mutations will affect all consumers.
+Middleware is synchronous, and is passed an object as follows:
 
+```js
+{
+  name: 'ExampleService',
+  depends: ['ThingItsDependentOn', 'OtherThing'],
+  instance: { thing: {}, other: {} }, //fully instantiated instance,
+  factory: ExampleService // factory
+}
+```
 
-## Create
-
-Resolves a factory's dependencies and then instantiates an instance with the given args.
+Usage:
 
 ```js
 
-function Engine() {}
-function Car(engine, color) { this.engine = engine; this.color = color; }
-Car.inject = ['Engine'];
-injector.factory('Engine', Engine);
-injector.factory('Car', Car);
-const car = injector.create('Car', ['blue']);
+  // will console log before getting any instance from the container
+  injector.middleware(entity => console.log('before global');
+  // will console log 'baz' before getting baz from the container - will always run after global above
+  injector.middleware('baz', entity => console.log(entity.name);
+  // will console log for any instance, but will run after baz and above global is logged 
+  injector.middleware(entity => console.log(`before global again - resolving ${entity.name}`);
 
-// { engine, engine, color: 'blue' }
+  injector.register('baz', result);
+
+  // will console log AFTER getting any instance from the container
+  injector.middleware(() => console.log('after global');
+  // will console log 'baz' AFTER getting baz from the container - will always run after global above
+  injector.middleware('baz', entity => console.log(entity.name);
+
+  injector.get('baz');
+
+  // -> before global
+  // -> baz
+  // -> before global again
+  // instance returned
+  // -> baz
+  // -> after global  
 
 ```
-
 
 ## Contributing
 We look forward to seeing your contributions!
