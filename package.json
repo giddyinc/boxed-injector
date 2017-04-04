@@ -63,7 +63,6 @@
     "test:injector": "mocha --require babel-register ./lib/injector/Injector.test.js"
   },
   "dependencies": {
-    "react": "^15.3.2",
-    "react-dom": "^15.3.2"
+    "react": "^15.3.2"
   }
 }
