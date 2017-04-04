@@ -85,6 +85,17 @@ console.log(carFactory === sameCarFactory);
 
 
 ```
+## Create
+Resolves a factory's dependencies and then instantiates an instance with the given args. Will call the constructor (new) on a registered instance that is a function.
+```js
+function Engine() {}
+function Car(engine, color) { this.engine = engine; this.color = color; }
+Car.inject = ['Engine'];
+injector.factory('Engine', Engine);
+injector.factory('Car', Car);
+const car = injector.create('Car', ['blue']);
+// { engine, engine, color: 'blue' }
+```
 
 ## Middleware
 Middleware functions are executed every time a service is accessed from the container (or on a factory, the first time it's accessed). 
@@ -96,7 +107,7 @@ Middleware is synchronous, and is passed an object as follows:
 {
   name: 'ExampleService',
   depends: ['ThingItsDependentOn', 'OtherThing'],
-  instance: { thing: {}, other: {} }, //fully instantiated instance,
+  instance: { thing: {}, other: {} }, // fully instantiated instance,
   factory: ExampleService // factory
 }
 ```
@@ -106,18 +117,18 @@ Usage:
 ```js
 
   // will console log before getting any instance from the container
-  injector.middleware(entity => console.log('before global');
+  injector.middleware(entity => console.log('before global'));
   // will console log 'baz' before getting baz from the container - will always run after global above
-  injector.middleware('baz', entity => console.log(entity.name);
+  injector.middleware('baz', entity => console.log(entity.name));
   // will console log for any instance, but will run after baz and above global is logged 
-  injector.middleware(entity => console.log(`before global again - resolving ${entity.name}`);
+  injector.middleware(entity => console.log(`before global again - resolving ${entity.name}`));
 
   injector.register('baz', result);
 
   // will console log AFTER getting any instance from the container
-  injector.middleware(() => console.log('after global');
+  injector.middleware(() => console.log('after global'));
   // will console log 'baz' AFTER getting baz from the container - will always run after global above
-  injector.middleware('baz', entity => console.log(entity.name);
+  injector.middleware('baz', entity => console.log(entity.name));
 
   injector.get('baz');
 
