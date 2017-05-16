@@ -20,7 +20,7 @@ There are 4 components.
 
 
 ## Installation 
-
+ 
 ```sh
 $ npm install --save boxed-injector
 ```
