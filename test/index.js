@@ -9,30 +9,16 @@ describe('boxed-injector', function () {
     beforeEach(() => {
       mod = require('../lib');
     });
-    it('Injectable', () => {
-      expect(mod.Injectable).toExist();
-    });
     it('Injector', () => {
       expect(mod.Injector).toExist();
-    });
-    it('Inject', () => {
-      expect(mod.Inject).toExist();
     });
     it('Locator', () => {
       expect(mod.Locator).toExist();
     });
   });
   describe('individual exports', () => {
-    it('Injectable', () => {
-      const mod = require('../lib/Injectable');
-      expect(mod).toExist();
-    });
     it('Injector', () => {
       const mod = require('../lib/Injector');
-      expect(mod).toExist();
-    });
-    it('Inject', () => {
-      const mod = require('../lib/Inject');
       expect(mod).toExist();
     });
     it('Locator', () => {

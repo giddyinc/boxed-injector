@@ -1,6 +1,6 @@
 {
   "name": "boxed-injector",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Dependency Injection Tools",
   "homepage": "",
   "author": {
@@ -9,8 +9,10 @@
     "url": ""
   },
   "files": [
-    "dist"
+    "dist",
+    "boxed-injector.d.ts"
   ],
+  "typings": "boxed-injector.d.ts",
   "main": "dist/index.js",
   "keywords": [
     "injector",
@@ -35,7 +37,6 @@
     "babel-preset-stage-0": "^6.5.0",
     "babel-register": "^6.9.0",
     "del": "^2.0.2",
-    "enzyme": "^2.6.0",
     "eslint": "^3.1.1",
     "eslint-config-xo-space": "^0.15.0",
     "eslint-plugin-babel": "^3.3.0",
@@ -52,7 +53,6 @@
     "gulp-nsp": "^2.1.0",
     "gulp-plumber": "^1.0.0",
     "isparta": "^4.0.0",
-    "react-addons-test-utils": "^15.3.2",
     "sinon": "^1.17.6"
   },
   "repository": "giddyinc/boxed-injector",
@@ -63,7 +63,5 @@
     "test:injector": "mocha --require babel-register ./lib/injector/Injector.test.js"
   },
   "dependencies": {
-    "react": "^15.3.2",
-    "react-dom": "^15.3.2"
   }
 }

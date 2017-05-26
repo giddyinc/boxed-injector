@@ -1,15 +1,17 @@
-var path = require('path');
-var gulp = require('gulp');
-var eslint = require('gulp-eslint');
-var excludeGitignore = require('gulp-exclude-gitignore');
-var mocha = require('gulp-mocha');
-var istanbul = require('gulp-istanbul');
-var nsp = require('gulp-nsp');
-var plumber = require('gulp-plumber');
-var coveralls = require('gulp-coveralls');
-var babel = require('gulp-babel');
-var del = require('del');
-var isparta = require('isparta');
+'use strict';
+
+const path = require('path');
+const gulp = require('gulp');
+const eslint = require('gulp-eslint');
+const excludeGitignore = require('gulp-exclude-gitignore');
+const mocha = require('gulp-mocha');
+const istanbul = require('gulp-istanbul');
+const nsp = require('gulp-nsp');
+const plumber = require('gulp-plumber');
+const coveralls = require('gulp-coveralls');
+const babel = require('gulp-babel');
+const del = require('del');
+const isparta = require('isparta');
 
 // Initialize the babel transpiler so ES2015 files gets compiled
 // when they're loaded
@@ -24,7 +26,9 @@ gulp.task('static', function () {
 });
 
 gulp.task('nsp', function (cb) {
-  nsp({package: path.resolve('package.json')}, cb);
+  nsp({
+    package: path.resolve('package.json')
+  }, cb);
 });
 
 gulp.task('pre-test', function () {
@@ -42,15 +46,17 @@ gulp.task('test', ['pre-test'], function () {
 
   return gulp.src(['lib/**/*.test.js', 'test/**/*.js'])
     .pipe(plumber())
-    .pipe(mocha({reporter: 'nyan'}))
+    .pipe(mocha({
+      reporter: 'nyan'
+    }))
     // .on('error', function (err) {
     //   mochaErr = err;
     // })
     .pipe(istanbul.writeReports());
-/*    .on('end', function () {
-      cb(mochaErr);
-    });
-    */
+  /*    .on('end', function () {
+        cb(mochaErr);
+      });
+      */
 });
 
 gulp.task('watch', ['test'], function () {
