@@ -11,13 +11,12 @@ $ npm install --save boxed-injector
 
 This is a set of lightweight Dependency Injection components that can be used in both client and server javascript code.
 
-There are 4 components.
+There are 2 components. 
 
 1. Injector (Dependency Injection Container)
-2. Locator (Service Locator, which leverages the DI Container)
-3. [Inject](lib/Inject/README.md) (Higher Order Component for resolving dependencies declaratively into React containers) - [See separate README](lib/Inject/README.md)
-4. [Injectable](lib/Injectable/README.md) (Wrapper around React Components for directly injecting resolved props) - [See separate README](lib/Injectable/README.md)
+2. Locator (Service Locator, which exposes the DI Container)
 
+For client side development with React, there are additional helper utilities in [boxed-injector-react](https://github.com/giddyinc/boxed-injector-react)
 
 ## Installation 
 
@@ -116,28 +115,31 @@ Usage:
 
 ```js
 
-  // will console log before getting any instance from the container
-  injector.middleware(entity => console.log('before global'));
-  // will console log 'baz' before getting baz from the container - will always run after global above
-  injector.middleware('baz', entity => console.log(entity.name));
-  // will console log for any instance, but will run after baz and above global is logged 
-  injector.middleware(entity => console.log(`before global again - resolving ${entity.name}`));
+const Injector = require('boxed-injector');
+const injector = new Injector();
 
-  injector.register('baz', result);
+// will console log before getting any instance from the container
+injector.middleware(entity => console.log('before global'));
+// will console log 'baz' before getting baz from the container - will always run after global above
+injector.middleware('baz', entity => console.log(entity.name));
+// will console log for any instance, but will run after baz and above global is logged 
+injector.middleware(entity => console.log(`before global again - resolving ${entity.name}`));
 
-  // will console log AFTER getting any instance from the container
-  injector.middleware(() => console.log('after global'));
-  // will console log 'baz' AFTER getting baz from the container - will always run after global above
-  injector.middleware('baz', entity => console.log(entity.name));
+injector.register('baz', 'result');
 
-  injector.get('baz');
+// will console log AFTER getting any instance from the container
+injector.middleware(() => console.log('after global'));
+// will console log 'baz' AFTER getting baz from the container - will always run after global above
+injector.middleware('baz', entity => console.log(entity.name));
 
-  // -> before global
-  // -> baz
-  // -> before global again
-  // instance returned
-  // -> baz
-  // -> after global  
+injector.get('baz');
+
+// -> before global
+// -> baz
+// -> before global again
+// instance returned
+// -> baz
+// -> after global  
 
 ```
 
