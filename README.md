@@ -19,7 +19,7 @@ There are 2 components.
 For client side development with React, there are additional helper utilities in [boxed-injector-react](https://github.com/giddyinc/boxed-injector-react)
 
 ## Installation 
-
+ 
 ```sh
 $ npm install --save boxed-injector
 ```
