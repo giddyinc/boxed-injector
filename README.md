@@ -143,6 +143,30 @@ injector.get('baz');
 
 ```
 
+
+## Advanced Usage
+```js
+
+// call the function directly instead of calling new on it.
+injector.factory('baz', () => {}, { function: true });
+
+// declare dependencies during registration rather than on the function.
+injector.factory('baz', () => {}, { depends: ['foo'] });
+
+// dependency could be singular.
+injector.factory('baz', () => {}, { depends: 'foo' });
+
+// dependency could be singular.
+injector.factory('baz', () => {}, { depends: 'foo' });
+
+injector.factory('d', x => x, {depends: 'c', function: true});
+// etc...
+
+// graph returns a 
+injector.graph('d');
+// ['d', 'c', 'b', 'a']
+```
+
 ## Contributing
 We look forward to seeing your contributions!
 

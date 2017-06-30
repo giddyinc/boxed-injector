@@ -42,21 +42,20 @@ gulp.task('pre-test', function () {
 });
 
 gulp.task('test', ['pre-test'], function () {
-  // var mochaErr;
+  let mochaErr;
 
   return gulp.src(['lib/**/*.test.js', 'test/**/*.js'])
     .pipe(plumber())
     .pipe(mocha({
       reporter: 'nyan'
     }))
-    // .on('error', function (err) {
-    //   mochaErr = err;
-    // })
-    .pipe(istanbul.writeReports());
-  /*    .on('end', function () {
-        cb(mochaErr);
-      });
-      */
+    .on('error', function (err) {
+      mochaErr = err;
+    })
+    .pipe(istanbul.writeReports())
+    .on('end', cb => {
+      cb(mochaErr);
+    });
 });
 
 gulp.task('watch', ['test'], function () {
