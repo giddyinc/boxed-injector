@@ -7,7 +7,7 @@ describe('boxed-injector', function () {
   describe('export', () => {
     let mod;
     beforeEach(() => {
-      mod = require('../lib');
+      mod = require('../src');
     });
     it('Injector', () => {
       expect(mod.Injector).toExist();
@@ -18,11 +18,11 @@ describe('boxed-injector', function () {
   });
   describe('individual exports', () => {
     it('Injector', () => {
-      const mod = require('../lib/Injector');
+      const mod = require('../src/Injector');
       expect(mod).toExist();
     });
     it('Locator', () => {
-      const mod = require('../lib/Locator');
+      const mod = require('../src/Locator');
       expect(mod).toExist();
     });
   });

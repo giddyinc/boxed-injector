@@ -6,7 +6,7 @@ const Injector = require('./Injector');
 
 /**
  * to run standalone:
- * mocha --require babel-register lib/Injector/Injector.test.js --watch
+ * mocha --require babel-register src/Injector/Injector.test.js --watch
  */
 
 describe('Injector', () => {
@@ -290,6 +290,26 @@ describe('Injector', () => {
     it('dont crash on no arr', () => {
       const instance1 = injector.create('BMW');
       expect(instance1.make).toBe('BMW');
+    });
+  });
+  describe('set', () => {
+    const name = 'foo';
+    const thing = 'abcd';
+    const otherThing = 'abcd';
+    it('doesn\'t exist', () => {
+      injector.set(name, thing);
+      expect(injector.get(name)).toEqual(thing);
+      injector.set(name, otherThing);
+      expect(injector.get(name)).toEqual(otherThing);
+    });
+  });
+  describe('has', () => {
+    const name = 'foo';
+    const thing = 'abcd';
+    it('doesn\'t exist', () => {
+      injector.factory(name, thing);
+      expect(injector.has(name)).toEqual(true);
+      expect(injector.has('bar')).toEqual(false);
     });
   });
 });

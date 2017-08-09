@@ -5,7 +5,7 @@ const Injector = require('./Injector');
 const sinon = require('sinon');
 
 /**
- * mocha lib/Injector/integration.test.js --watch
+ * mocha src/Injector/integration.test.js --watch
  */
 
 describe('Injector Integration', () => {

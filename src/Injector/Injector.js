@@ -35,13 +35,13 @@ class Injector {
         });
       run(entityMiddleware.after.concat(globalAfter));
     } else {
-      throw new Error(`Invalid lifecycle method.`);
+      throw new Error('Invalid lifecycle method.');
     }
   }
 
   _ensureDistinct(name) {
     assert(this.factories[name] === undefined, 'Cannot overwrite a factory once registered.');
-    assert(this.instances[name] === undefined, "Cannot overwrite a service once registered.");
+    assert(this.instances[name] === undefined, 'Cannot overwrite a service once registered.');
   }
 
   _initMiddleware(name) {
@@ -54,10 +54,17 @@ class Injector {
     }
   }
 
-  has(key) {
-    foo = bar;
+  set(key, value) {
+    if (!this.has(key)) {
+      return this.register(key, value);
+    }
+    Object.assign(this.instances[key], {
+      instance: value
+    });
+  }
 
-    return (this.factories[name] || this.instances[name]) ? true : false;
+  has(key) {
+    return Boolean(this.factories[key] || this.instances[key]);
   }
 
   factory(name, factory, options) {
@@ -166,9 +173,9 @@ class Injector {
 
       return obj;
     }, {
-        all: [],
-        hash: {}
-      });
+      all: [],
+      hash: {}
+    });
 
     if (!nested) {
       return graph.all;

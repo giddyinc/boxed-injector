@@ -5,7 +5,7 @@ clean:
 
 test: prepublish
 	make lint
-	./node_modules/.bin/nyc --all --require babel-register ./node_modules/.bin/mocha test
+	NODE_ENV=test ./node_modules/.bin/nyc --all --require babel-register ./node_modules/.bin/mocha test
 
 coverage:
 	./node_modules/.bin/nyc report --reporter=text-lcov | coveralls
