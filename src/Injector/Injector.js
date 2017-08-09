@@ -147,7 +147,11 @@ class Injector {
   }
 
   graph(name, nested) {
-    if (!Array.isArray(name) && !this.factories[name] && !this.instances[name]) {
+    const defaultObj = {all: [], hash: {}};
+    if (!Array.isArray(name) && !this.has(name)) {
+      if (nested) {
+        return defaultObj;
+      }
       return [];
     }
 
@@ -167,15 +171,13 @@ class Injector {
 
       add(elem);
       const child = this.graph(elem, true);
+      console.log('this bout to fail', child);
       child.all.forEach(childDep => {
         add(childDep);
       });
 
       return obj;
-    }, {
-      all: [],
-      hash: {}
-    });
+    }, defaultObj);
 
     if (!nested) {
       return graph.all;

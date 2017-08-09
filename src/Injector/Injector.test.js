@@ -26,9 +26,15 @@ describe('Injector', () => {
   });
   describe('register', () => {
     it('should be able to register instances', () => {
+      injector.register('foo', 'bar', {depends: 'bar'});
+      expect(injector.graph('foo')).toEqual(['bar']);
+    });
+
+    it('should be able to register instances', () => {
       injector.register('foo', 'bar');
       expect(injector.instances.foo.instance).toEqual('bar', 'was expecting to be able to register instances.');
     });
+
     it('should be able to register booleans', () => {
       injector.register('foo', true);
       injector.register('bar', false);
@@ -185,6 +191,10 @@ describe('Injector', () => {
   });
 
   describe('graph', () => {
+    it('should return empty [] for undef.', () => {
+      const result = injector.graph('asdf');
+      expect(result).toEqual([]);
+    });
     it('should get a graph', () => {
       injector.register('asdf', 'asdf');
       injector.factory('a', () => 'a', {depends: [], function: true});

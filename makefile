@@ -3,9 +3,9 @@
 clean:
 	rm -rf coverage dist .nyc_output
 
-test: prepublish
+test:
 	make lint
-	NODE_ENV=test ./node_modules/.bin/nyc --all --require babel-register ./node_modules/.bin/mocha test
+	./node_modules/.bin/nyc ./node_modules/.bin/mocha test src --opts .mocharc
 
 coverage:
 	./node_modules/.bin/nyc report --reporter=text-lcov | coveralls
