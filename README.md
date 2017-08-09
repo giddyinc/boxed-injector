@@ -1,4 +1,5 @@
-# boxed-injector [![NPM version][npm-image]][npm-url] [![Build Status](https://travis-ci.org/giddyinc/boxed-injector.svg?branch=master)](https://travis-ci.org/giddyinc/boxed-injector) [![Dependency Status][daviddm-image]][daviddm-url] [![Coverage Status](https://coveralls.io/repos/github/giddyinc/boxed-injector/badge.svg?branch=master)](https://coveralls.io/github/giddyinc/boxed-injector?branch=master)
+# boxed-injector [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Coverage Status][coveralls-image]][coveralls-url]
+
 > Dependency Injection Tools
 
 ## Installation
@@ -165,6 +166,12 @@ injector.factory('d', x => x, {depends: 'c', function: true});
 // graph returns a 
 injector.graph('d');
 // ['d', 'c', 'b', 'a']
+
+// true or false if the injector has a service/factory registered.
+injector.has('foo');
+
+// like injector.register, but actually replaces the instance (no guard)
+injector.set('foo', 'bar');
 ```
 
 ## Contributing
