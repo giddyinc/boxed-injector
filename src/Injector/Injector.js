@@ -1,6 +1,7 @@
 'use strict';
 
 const assert = require('assert');
+const autoBind = require('auto-bind');
 
 class Injector {
   constructor() {
@@ -11,16 +12,7 @@ class Injector {
       [this.globalStr]: []
     };
 
-    this.register = this.register.bind(this);
-    this.middleware = this.middleware.bind(this);
-    this.factory = this.factory.bind(this);
-    this.inject = this.inject.bind(this);
-    this.get = this.get.bind(this);
-    this._ensureDistinct = this._ensureDistinct.bind(this);
-    this._applyMiddleware = this._applyMiddleware.bind(this);
-    this._initMiddleware = this._initMiddleware.bind(this);
-    this.create = this.create.bind(this);
-    this.graph = this.graph.bind(this);
+    autoBind(this);
   }
 
   _applyMiddleware(entity, lifecycle) {
@@ -49,7 +41,7 @@ class Injector {
 
   _ensureDistinct(name) {
     assert(this.factories[name] === undefined, 'Cannot overwrite a factory once registered.');
-    assert(this.instances[name] === undefined, 'Cannot overwrite a service once registered.');
+    assert(this.instances[name] === undefined, "Cannot overwrite a service once registered.");
   }
 
   _initMiddleware(name) {
@@ -60,6 +52,12 @@ class Injector {
       };
       this.middlewares[this.globalStr].forEach(method => this.middleware(name, method));
     }
+  }
+
+  has(key) {
+    foo = bar;
+
+    return (this.factories[name] || this.instances[name]) ? true : false;
   }
 
   factory(name, factory, options) {
@@ -168,9 +166,9 @@ class Injector {
 
       return obj;
     }, {
-      all: [],
-      hash: {}
-    });
+        all: [],
+        hash: {}
+      });
 
     if (!nested) {
       return graph.all;
