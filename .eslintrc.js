@@ -3,20 +3,15 @@ module.exports = {
   "env": {
     "mocha": true
   },
-  "parser": "babel-eslint",
   "parserOptions": {
     "ecmaFeatures": {
       "experimentalObjectRestSpread": true,
-      "jsx": true
     },
     "sourceType": "module"
   },
-  "plugins": [
-    "react"
-  ],
   "rules": {
     "guard-for-in": [0],
-    "react/jsx-uses-vars": "error",
-    "no-multiple-empty-lines": 1
+    "no-multiple-empty-lines": 1,
+    "quotes": [2, "single"]
   }
 }

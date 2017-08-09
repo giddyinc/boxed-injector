@@ -1,6 +1,7 @@
 'use strict';
 
 const assert = require('assert');
+const autoBind = require('auto-bind');
 
 class Injector {
   constructor() {
@@ -11,16 +12,7 @@ class Injector {
       [this.globalStr]: []
     };
 
-    this.register = this.register.bind(this);
-    this.middleware = this.middleware.bind(this);
-    this.factory = this.factory.bind(this);
-    this.inject = this.inject.bind(this);
-    this.get = this.get.bind(this);
-    this._ensureDistinct = this._ensureDistinct.bind(this);
-    this._applyMiddleware = this._applyMiddleware.bind(this);
-    this._initMiddleware = this._initMiddleware.bind(this);
-    this.create = this.create.bind(this);
-    this.graph = this.graph.bind(this);
+    autoBind(this);
   }
 
   _applyMiddleware(entity, lifecycle) {
@@ -43,7 +35,7 @@ class Injector {
         });
       run(entityMiddleware.after.concat(globalAfter));
     } else {
-      throw new Error(`Invalid lifecycle method.`);
+      throw new Error('Invalid lifecycle method.');
     }
   }
 
@@ -60,6 +52,19 @@ class Injector {
       };
       this.middlewares[this.globalStr].forEach(method => this.middleware(name, method));
     }
+  }
+
+  set(key, value) {
+    if (!this.has(key)) {
+      return this.register(key, value);
+    }
+    Object.assign(this.instances[key], {
+      instance: value
+    });
+  }
+
+  has(key) {
+    return Boolean(this.factories[key] || this.instances[key]);
   }
 
   factory(name, factory, options) {
@@ -142,7 +147,11 @@ class Injector {
   }
 
   graph(name, nested) {
-    if (!Array.isArray(name) && !this.factories[name] && !this.instances[name]) {
+    const defaultObj = {all: [], hash: {}};
+    if (!Array.isArray(name) && !this.has(name)) {
+      if (nested) {
+        return defaultObj;
+      }
       return [];
     }
 
@@ -162,15 +171,13 @@ class Injector {
 
       add(elem);
       const child = this.graph(elem, true);
+      console.log('this bout to fail', child);
       child.all.forEach(childDep => {
         add(childDep);
       });
 
       return obj;
-    }, {
-      all: [],
-      hash: {}
-    });
+    }, defaultObj);
 
     if (!nested) {
       return graph.all;

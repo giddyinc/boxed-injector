@@ -4,7 +4,7 @@ const Injector = require('../Injector/Injector');
 
 /**
  * to run standalone:
- * mocha --require babel-register lib/Locator/Locator.test.js --watch
+ * mocha --require babel-register src/Locator/Locator.test.js --watch
  */
 
 describe('Locator', () => {
