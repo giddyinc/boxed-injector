@@ -1,91 +1,50 @@
+declare namespace Injector {
+  export interface BaseOptions {
+    depends: Array<string> | string
+  }
 
-export class Injector {
-    constructor();
+  export interface FactoryOptions extends BaseOptions {}
+  export interface RegisterOptions extends BaseOptions {}
 
-    create(name: any, otherArgs: any, ...args: any[]): any;
-
-    factory(name: string, _factory: any): any;
-
-    get(name: string): any;
-
-    inject(Factory: any): any;
-
-    middleware(name: string, method: any): any;
-
-    register(name: string, instance: any): any;
-
+  export interface Entity {
+    factory: any,
+    depends: Array<string>,
+    options?: {
+      function: boolean
+    }
+  }
 }
 
-export namespace Injector {
-    namespace prototype {
-        function create(name: string, otherArgs: any, ...args: any[]): any;
+declare class Injector {
+  constructor();
 
-        function factory(name: string, _factory: any): any;
+  set(key: any, value: any): this;
 
-        function get(name: string): any;
+  has(key: any): boolean;
 
-        function inject(Factory: any): any;
+  factory(name: string, factory: any, options?: Injector.FactoryOptions): this;
 
-        function middleware(name: string, method: any): any;
+  register(name: string, factory: any, options?: Injector.RegisterOptions): this;
 
-        function register(name: string, instance: any): any;
+  inject(entity: Injector.Entity): any;
 
-        namespace create {
-            const prototype: {
-            };
+  create(name: string, otherArgs: any): any;
 
-        }
+  graph(name: string, nested: boolean): Array<string>;
 
-        namespace factory {
-            const prototype: {
-            };
+  get(name: string): any;
 
-        }
-
-        namespace get {
-            const prototype: {
-            };
-
-        }
-
-        namespace inject {
-            const prototype: {
-            };
-
-        }
-
-        namespace middleware {
-            const prototype: {
-            };
-
-        }
-
-        namespace register {
-            const prototype: {
-            };
-
-        }
-
-    }
-
+  middleware(name: string, method: Function): this;
+  middleware(method: Function): this;
 }
 
-export namespace Locator {
-    function get(): Injector;
+declare namespace Locator {
+  function set(injector: Injector): any;
 
-    function set(injector: Injector): void;
-
-    namespace get {
-        const prototype: {
-        };
-
-    }
-
-    namespace set {
-        const prototype: {
-        };
-
-    }
-
+  function get(): Injector;
 }
 
+export {
+  Injector,
+  Locator
+};
