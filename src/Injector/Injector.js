@@ -61,6 +61,7 @@ class Injector {
     Object.assign(this.instances[key], {
       instance: value
     });
+    return this;
   }
 
   has(key) {
