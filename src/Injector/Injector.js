@@ -145,7 +145,9 @@ class Injector {
     const {
       get
     } = this;
-    const factory = entity.factory;
+    const {
+      factory
+    } = entity;
     const args = entity.depends || [];
     const deps = args.map(dependency => get(dependency));
 
@@ -188,7 +190,10 @@ class Injector {
       instances
     } = this;
 
-    const defaultObj = {all: [], hash: {}};
+    const defaultObj = {
+      all: [],
+      hash: {}
+    };
     if (!Array.isArray(name) && !has(name)) {
       if (nested) {
         return defaultObj;
