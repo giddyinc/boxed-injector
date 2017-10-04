@@ -14,10 +14,7 @@ prepublish: clean
 	./node_modules/.bin/babel src --out-dir dist
 
 watch:
-		mocha --require babel-register --watch
+	mocha src/**/*.test.js test --opts .mocharc --watch
 
 lint:
 	./node_modules/.bin/eslint src test
-
-# watch:
-	# mocha --require babel-register lib/**/*.test.js test --watch

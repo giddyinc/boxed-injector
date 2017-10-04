@@ -2,3 +2,4 @@
 --require babel-register
 --colors
 --bail
+--reporter dot
