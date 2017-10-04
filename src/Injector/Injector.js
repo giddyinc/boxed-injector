@@ -83,7 +83,7 @@ class Injector {
     return Boolean(this.factories[key] || this.instances[key]);
   }
 
-  factory(name, factory, options) {
+  factory(name, factory, options = {}) {
     const {
       _ensureDistinct,
       _initMiddleware,
@@ -94,8 +94,6 @@ class Injector {
 
     _ensureDistinct(name);
     _initMiddleware(name);
-
-    options = options || {};
 
     let depends = options.depends || factory.inject;
 
@@ -117,7 +115,7 @@ class Injector {
     return this;
   }
 
-  register(name, instance, options) {
+  register(name, instance, options = {}) {
     const {
       _ensureDistinct,
       _initMiddleware,
@@ -127,8 +125,6 @@ class Injector {
 
     _ensureDistinct(name);
     _initMiddleware(name);
-
-    options = options || {};
 
     let depends = options.depends || [];
 

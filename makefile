@@ -18,3 +18,6 @@ watch:
 
 lint:
 	./node_modules/.bin/eslint src test
+
+prepublish:
+	./node_modules/.bin/gulp prepublish
