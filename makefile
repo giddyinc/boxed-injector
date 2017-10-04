@@ -18,3 +18,6 @@ watch:
 
 lint:
 	./node_modules/.bin/eslint src test
+
+# watch:
+	# mocha --require babel-register lib/**/*.test.js test --watch
