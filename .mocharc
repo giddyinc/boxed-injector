@@ -1,5 +1,6 @@
 --recursive
---require babel-register
 --colors
 --bail
 --reporter dot
+--require ts-node/register
+--require source-map-support/register

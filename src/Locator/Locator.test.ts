@@ -1,6 +1,7 @@
 'use strict';
-const expect = require('expect');
-const Injector = require('../Injector/Injector');
+
+import expect from 'expect';
+import Injector from '../Injector/Injector';
 
 /**
  * to run standalone:
@@ -8,7 +9,7 @@ const Injector = require('../Injector/Injector');
  */
 
 describe('Locator', () => {
-  let injector;
+  let injector: Injector;
   let store;
 
   before(() => {

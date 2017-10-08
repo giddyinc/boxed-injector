@@ -1,13 +1,17 @@
 'use strict';
 
-const assert = require('assert');
-const autoBind = require('auto-bind');
+import * as assert from 'assert';
+import * as autoBind from 'auto-bind';
 
 class Injector {
+  private globalStr: string = '__global__';
+  instances: any;
+  factories: any;
+  middlewares: any;
+
   constructor() {
     this.instances = {};
     this.factories = {};
-    this.globalStr = '__global__';
 
     this.middlewares = {
       [this.globalStr]: []
@@ -16,7 +20,7 @@ class Injector {
     autoBind(this);
   }
 
-  _applyMiddleware(entity, lifecycle) {
+  _applyMiddleware(entity, lifecycle: string) {
     const {
       globalStr,
       middlewares
@@ -100,7 +104,7 @@ class Injector {
     return Boolean(this.factories[key] || this.instances[key]);
   }
 
-  factory(name, factory, options = {}) {
+  factory(name, factory, options:any = {}) {
     const {
       _ensureDistinct,
       _initMiddleware,
@@ -132,7 +136,7 @@ class Injector {
     return this;
   }
 
-  register(name, instance, options = {}) {
+  register(name, instance, options:any = {}) {
     const {
       _ensureDistinct,
       _initMiddleware,
@@ -329,4 +333,4 @@ class Injector {
 
 }
 
-module.exports = Injector;
+export default Injector;

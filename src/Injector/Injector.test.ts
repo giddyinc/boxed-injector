@@ -1,8 +1,8 @@
 'use strict';
 
-const expect = require('expect');
-const sinon = require('sinon');
-const Injector = require('./Injector');
+import expect from 'expect';
+import sinon from 'sinon';
+import Injector from './Injector';
 
 /**
  * to run standalone:
@@ -45,7 +45,7 @@ describe('Injector', () => {
 
   describe('middleware', () => {
     let logger = {
-      log() { }
+      log(txt:string) { }
     };
     beforeEach(() => {
       sandbox.stub(logger, 'log');

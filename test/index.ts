@@ -1,14 +1,15 @@
 
 'use strict';
 
-const expect = require('expect');
+import expect from 'expect';
+import * as mod from '../src';
+import Injector from '../src/Injector';
+import Locator from '../src/Locator';
 
-describe('boxed-injector', function () {
+// mocha --opts .mocharc test/**/*.ts
+
+describe('boxed-injector', () => {
   describe('export', () => {
-    let mod;
-    beforeEach(() => {
-      mod = require('../src');
-    });
     it('Injector', () => {
       expect(mod.Injector).toExist();
     });
@@ -18,12 +19,10 @@ describe('boxed-injector', function () {
   });
   describe('individual exports', () => {
     it('Injector', () => {
-      const mod = require('../src/Injector');
-      expect(mod).toExist();
+      expect(Injector).toExist();
     });
     it('Locator', () => {
-      const mod = require('../src/Locator');
-      expect(mod).toExist();
+      expect(Locator).toExist();
     });
   });
 });

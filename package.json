@@ -22,6 +22,8 @@
   ],
   "devDependencies": {
     "@istanbuljs/nyc-config-babel": "^1.2.2",
+    "@types/mocha": "2.2.43",
+    "@types/node": "8.0.33",
     "babel-cli": "^6.24.1",
     "babel-core": "^6.11.4",
     "babel-eslint": "^6.1.2",
@@ -40,7 +42,10 @@
     "expect": "^1.20.2",
     "mocha": "^3.5.0",
     "nyc": "^11.1.0",
-    "sinon": "^1.17.6"
+    "sinon": "^1.17.6",
+    "source-map-support": "0.5.0",
+    "ts-node": "3.3.0",
+    "typescript": "2.5.3"
   },
   "repository": "giddyinc/boxed-injector",
   "scripts": {
