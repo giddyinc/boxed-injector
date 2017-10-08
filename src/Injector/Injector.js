@@ -69,14 +69,31 @@ class Injector {
     }
   }
 
-  set(key, value) {
-    if (!this.has(key)) {
-      return this.register(key, value);
-    }
-    Object.assign(this.instances[key], {
-      instance: value
+  unset(key) {
+    const {
+      instances,
+      factories
+    } = this;
+    Object.assign(instances, {
+      [key]: undefined
+    });
+    Object.assign(factories, {
+      [key]: undefined
     });
     return this;
+  }
+
+  set(key, value) {
+    const {
+      has,
+      unset,
+      register
+    } = this;
+
+    if (has(key)) {
+      unset(key);
+    }
+    return register(key, value);
   }
 
   has(key) {

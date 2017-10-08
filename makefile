@@ -19,5 +19,5 @@ watch:
 lint:
 	./node_modules/.bin/eslint src test
 
-prepublish:
-	./node_modules/.bin/gulp prepublish
+dev:
+	./node_modules/.bin/babel src --out-dir dist --watch
