@@ -8,6 +8,7 @@ class Injector {
     this.instances = {};
     this.factories = {};
     this.globalStr = '__global__';
+
     this.middlewares = {
       [this.globalStr]: []
     };
@@ -16,9 +17,13 @@ class Injector {
   }
 
   _applyMiddleware(entity, lifecycle) {
-    const self = this;
-    const entityMiddleware = self.middlewares[entity.name];
-    const globalMiddleware = self.middlewares[this.globalStr];
+    const {
+      globalStr,
+      middlewares
+    } = this;
+
+    const entityMiddleware = middlewares[entity.name];
+    const globalMiddleware = middlewares[globalStr];
 
     const run = middlewares => {
       middlewares.forEach(middleware => middleware(entity));
@@ -40,39 +45,72 @@ class Injector {
   }
 
   _ensureDistinct(name) {
-    assert(this.factories[name] === undefined, 'Cannot overwrite a factory once registered.');
-    assert(this.instances[name] === undefined, 'Cannot overwrite a service once registered.');
+    const {
+      instances,
+      factories
+    } = this;
+    assert(factories[name] === undefined, 'Cannot overwrite a factory once registered.');
+    assert(instances[name] === undefined, 'Cannot overwrite a service once registered.');
   }
 
   _initMiddleware(name) {
-    if (!this.middlewares[name]) {
-      this.middlewares[name] = {
+    const {
+      globalStr,
+      middleware,
+      middlewares
+    } = this;
+
+    if (!middlewares[name]) {
+      middlewares[name] = {
         before: [],
         after: []
       };
-      this.middlewares[this.globalStr].forEach(method => this.middleware(name, method));
+      middlewares[globalStr].forEach(method => middleware(name, method));
     }
   }
 
-  set(key, value) {
-    if (!this.has(key)) {
-      return this.register(key, value);
-    }
-    Object.assign(this.instances[key], {
-      instance: value
+  unset(key) {
+    const {
+      instances,
+      factories
+    } = this;
+    Object.assign(instances, {
+      [key]: undefined
+    });
+    Object.assign(factories, {
+      [key]: undefined
     });
     return this;
+  }
+
+  set(key, value) {
+    const {
+      has,
+      unset,
+      register
+    } = this;
+
+    if (has(key)) {
+      unset(key);
+    }
+    return register(key, value);
   }
 
   has(key) {
     return Boolean(this.factories[key] || this.instances[key]);
   }
 
-  factory(name, factory, options) {
+  factory(name, factory, options = {}) {
+    const {
+      _ensureDistinct,
+      _initMiddleware,
+      factories
+    } = this;
+
     assert(name, 'Invalid name. Factories must be registered with a valid unique string.');
-    this._ensureDistinct(name);
-    this._initMiddleware(name);
-    options = options || {};
+
+    _ensureDistinct(name);
+    _initMiddleware(name);
 
     let depends = options.depends || factory.inject;
 
@@ -84,7 +122,7 @@ class Injector {
       depends = [depends];
     }
 
-    this.factories[name] = {
+    factories[name] = {
       name,
       factory,
       depends,
@@ -94,11 +132,16 @@ class Injector {
     return this;
   }
 
-  register(name, instance, options) {
+  register(name, instance, options = {}) {
+    const {
+      _ensureDistinct,
+      _initMiddleware,
+      instances
+    } = this;
     assert(name, 'Invalid name. Instances must be registered with a valid unique string.');
-    this._ensureDistinct(name);
-    this._initMiddleware(name);
-    options = options || {};
+
+    _ensureDistinct(name);
+    _initMiddleware(name);
 
     let depends = options.depends || [];
 
@@ -106,7 +149,7 @@ class Injector {
       depends = [depends];
     }
 
-    this.instances[name] = {
+    instances[name] = {
       name,
       instance,
       depends
@@ -116,9 +159,14 @@ class Injector {
   }
 
   inject(entity) {
-    const factory = entity.factory;
+    const {
+      get
+    } = this;
+    const {
+      factory
+    } = entity;
     const args = entity.depends || [];
-    const deps = args.map(dependency => this.get(dependency));
+    const deps = args.map(dependency => get(dependency));
 
     if (entity.options.function) {
       return factory(...deps);
@@ -128,28 +176,42 @@ class Injector {
   }
 
   create(name, otherArgs) {
-    const self = this;
+    const {
+      get,
+      factories,
+      instances
+    } = this;
 
     if (arguments.length > 2) {
       otherArgs = [...arguments].slice(1);
     }
 
-    assert(self.factories[name] || (self.instances[name] && typeof self.instances[name].instance === 'function'), 'Factory or Service must be registered.');
-    if (self.factories[name]) {
-      const entity = self.factories[name];
+    assert(factories[name] || (instances[name] && typeof instances[name].instance === 'function'), 'Factory or Service must be registered.');
+
+    if (factories[name]) {
+      const entity = factories[name];
       const Factory = entity.factory;
       const args = entity.depends || [];
-      const resolvedDeps = args.map(dependency => this.get(dependency));
+      const resolvedDeps = args.map(dependency => get(dependency));
       const merged = [].concat(resolvedDeps, otherArgs);
       return new Factory(...merged);
     }
-    const Instance = self.instances[name].instance;
+    const Instance = instances[name].instance;
     return new Instance(...otherArgs);
   }
 
   graph(name, nested) {
-    const defaultObj = {all: [], hash: {}};
-    if (!Array.isArray(name) && !this.has(name)) {
+    const {
+      factories,
+      has,
+      instances
+    } = this;
+
+    const defaultObj = {
+      all: [],
+      hash: {}
+    };
+    if (!Array.isArray(name) && !has(name)) {
       if (nested) {
         return defaultObj;
       }
@@ -158,7 +220,7 @@ class Injector {
 
     const entityKeys = Array.isArray(name) ? name : [name];
     const deps = entityKeys.reduce((children, key) => {
-      const entity = this.factories[key] ? this.factories[key] : this.instances[key];
+      const entity = factories[key] ? factories[key] : instances[key];
       return children.concat(entity.depends);
     }, []);
 
@@ -188,61 +250,78 @@ class Injector {
   }
 
   get(name) {
-    const self = this;
+    const {
+      _applyMiddleware,
+      factories,
+      inject,
+      instances
+    } = this;
+
     let isFactory = false;
-    if (self.factories[name]) {
+    if (factories[name]) {
       isFactory = true;
     }
 
-    if (!self.instances[name]) {
-      assert(self.factories[name], `${name} is not yet registered! You either misspelled the name or forgot to register it.`);
-      assert(typeof self.factories[name].factory === 'function', `${name} is not a constructor. Try declaring as an instance instead of a factory.`);
-      const entity = self.factories[name];
-      self._applyMiddleware(entity, 'before'); // run before middleware on factory - only runs once
-      self.instances[name] = Object.assign({}, self.factories[name], {
-        instance: self.inject(entity)
+    if (!instances[name]) {
+      assert(factories[name], `${name} is not yet registered! You either misspelled the name or forgot to register it.`);
+      assert(typeof factories[name].factory === 'function', `${name} is not a constructor. Try declaring as an instance instead of a factory.`);
+      const entity = factories[name];
+      _applyMiddleware(entity, 'before'); // run before middleware on factory - only runs once
+      instances[name] = Object.assign({}, factories[name], {
+        instance: inject(entity)
       });
     }
 
-    const instanceEntity = self.instances[name];
+    const instanceEntity = instances[name];
     if (!isFactory) {
-      self._applyMiddleware(instanceEntity, 'before'); // run before middleware on instance
+      _applyMiddleware(instanceEntity, 'before'); // run before middleware on instance
     }
+
     setTimeout(() => {
-      self._applyMiddleware(instanceEntity, 'after'); // run after middleware on all instances
+      _applyMiddleware(instanceEntity, 'after'); // run after middleware on all instances
     });
 
     return instanceEntity.instance;
   }
 
   middleware(name, method) {
+    const {
+      _initMiddleware,
+      factories,
+      instances,
+      globalStr,
+      middlewares
+    } = this;
+
     if (typeof name === 'function') {
       method = name;
-      name = this.globalStr;
+      name = globalStr;
     }
+
     assert(typeof method === 'function', 'Middleware must be passed a function.');
 
-    if (name === this.globalStr) {
-      this.middlewares[name].push(method);
+    if (name === globalStr) {
+      middlewares[name].push(method);
       return this;
     }
 
-    if (!this.middlewares[name]) {
-      this._initMiddleware(name);
+    if (!middlewares[name]) {
+      _initMiddleware(name);
     }
 
     // if service or factory isn't registered, run middleware before get
-    if (!this.instances[name] && !this.factories[name]) {
+    if (!instances[name] && !factories[name]) {
       // run before all gets
-      this.middlewares[name].before.push(method);
+      middlewares[name].before.push(method);
     } else {
       // run after all gets
       // if global middlewares exist, that arent in before / after already, queue them up
-      const globals = this.middlewares[this.globalStr].filter(x => {
-        return (!this.middlewares[name].before.includes(x) && !this.middlewares[name].after.includes(x));
+      const globals = middlewares[globalStr].filter(x => {
+        return (!middlewares[name].before.includes(x) && !middlewares[name].after.includes(x));
       });
-      this.middlewares[name].after = this.middlewares[name].after.concat(globals);
-      this.middlewares[name].after.push(method);
+
+      middlewares[name].after = middlewares[name].after.concat(globals);
+      middlewares[name].after.push(method);
     }
 
     return this;

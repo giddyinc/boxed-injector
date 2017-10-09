@@ -12,6 +12,9 @@ module.exports = {
   "rules": {
     "guard-for-in": [0],
     "no-multiple-empty-lines": 1,
-    "quotes": [2, "single"]
+    "quotes": [2, "single"],
+    "no-multiple-empty-lines": 1,
+    "prefer-destructuring": 1,
+    "eol-last": 0
   }
 }
