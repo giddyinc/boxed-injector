@@ -35,6 +35,10 @@ describe('Injector Integration', () => {
     expect(injector.get('foo').result).toEqual(result);
   });
 
+  // interface Injectable {
+  //   static inject: Array<string>
+  // }
+
   it('should resolve', () => {
     const result = 'baz';
     function foo(baz) {
