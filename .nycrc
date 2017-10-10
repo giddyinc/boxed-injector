@@ -1,0 +1,10 @@
+{
+  "include": [
+    "src/**/*.js"
+  ],
+  "extension": [
+    ".js"
+  ],
+  "sourceMap": true,
+  "instrument": true
+}
