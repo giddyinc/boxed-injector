@@ -39,12 +39,11 @@
     "eslint-plugin-babel": "^3.3.0",
     "expect": "^1.20.2",
     "mocha": "^3.5.0",
-    "nyc": "^11.1.0",
+    "nyc": "11.2.1",
     "sinon": "^1.17.6"
   },
   "repository": "giddyinc/boxed-injector",
   "scripts": {
-    "pretest": "NODE_ENV=test ./node_modules/.bin/babel src --out-dir dist",
     "prepublish": "make prepublish",
     "test": "make test",
     "test:watch": "make watch"

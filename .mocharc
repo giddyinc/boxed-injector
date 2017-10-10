@@ -1,5 +1,7 @@
---recursive
 --require babel-register
+--recursive
 --colors
 --bail
 --reporter dot
+test
+src/**/*.test.js
