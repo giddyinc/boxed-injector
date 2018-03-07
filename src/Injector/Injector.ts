@@ -40,7 +40,7 @@ export class Injector {
   public instances: { [key: string]: IInstance };
   public factories: { [key: string]: IFactory };
   private globalStr: string;
-  private middlewares: IGlobalMiddlewares | IEntityMiddleware;
+  private middlewares: any;
 
   constructor() {
     this.instances = {};

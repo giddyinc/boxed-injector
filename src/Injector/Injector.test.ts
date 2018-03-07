@@ -2,7 +2,7 @@
 
 const expect = require('expect');
 import sinon from 'sinon';
-import { Injector } from './Injector';
+import Injector from './Injector';
 
 // const { Injector } = BInjector;
 
@@ -56,10 +56,11 @@ describe('Injector', () => {
       injector.middleware('foo', x => logger.log(x));
       injector.middleware(x => logger.log(x));
       injector.register('foo', 'bar');
-      expect(injector.middlewares.foo).toExist('expected middleware to exist');
-      expect(Array.isArray(injector.middlewares.foo.after)).toBe(true, 'expected middleware to be an array');
-      expect(injector.middlewares.foo.after.length).toBe(0);
-      expect(injector.middlewares.__global__.length).toBe(1);
+      const res = injector.middlewares;
+      expect(res.foo).toExist('expected middleware to exist');
+      expect(Array.isArray(res.foo.after)).toBe(true, 'expected middleware to be an array');
+      expect(res.foo.after.length).toBe(0);
+      expect(res.__global__.length).toBe(1);
     });
 
     it('should be able to register middlewares - after', () => {
