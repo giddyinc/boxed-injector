@@ -1,6 +1,6 @@
 declare namespace Injector {
   export interface BaseOptions {
-    depends: Array<string> | string
+    depends: Array<string> | string | { [key: string]: any }
   }
 
   export interface FactoryOptions extends BaseOptions {}

@@ -118,7 +118,7 @@ class Injector {
       depends = [];
     }
 
-    if (!Array.isArray(depends)) {
+    if (!Array.isArray(depends) && typeof depends === 'string') {
       depends = [depends];
     }
 
@@ -163,16 +163,33 @@ class Injector {
       get
     } = this;
     const {
-      factory
+      factory,
+      depends: args = [],
+      options
     } = entity;
-    const args = entity.depends || [];
-    const deps = args.map(dependency => get(dependency));
 
-    if (entity.options.function) {
-      return factory(...deps);
+    // handle array of dependencies
+    if (Array.isArray(args)) {
+      const deps = args.map(dependency => get(dependency));
+      if (options.function) {
+        return factory(...deps);
+      }
+
+      return new factory(...deps); /* eslint new-cap:0 */
     }
 
-    return new factory(...deps); /* eslint new-cap:0 */
+    // map values to either object (if object literal) or if its a string
+    // and the key === value, treat it as a registered entity
+    const dep = Object.keys(args).reduce((all, next) => {
+      const val = args[next];
+      all[next] = (typeof val === 'string' && val === next) ? get(val) : val;
+      return all;
+    }, {});
+
+    if (options.function) {
+      return factory(dep);
+    }
+    return new factory(dep); /* eslint new-cap:0 */
   }
 
   create(name, otherArgs) {
@@ -258,6 +275,7 @@ class Injector {
     } = this;
 
     let isFactory = false;
+
     if (factories[name]) {
       isFactory = true;
     }

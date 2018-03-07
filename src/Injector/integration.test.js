@@ -49,7 +49,7 @@ describe('Injector Integration', () => {
   it('should enable middleware', () => {
     const result = 'baz';
     const logger = {
-      log() {}
+      log() { }
     };
     sandbox.stub(logger);
     injector.middleware(x => console.log(`Resolving ${x.name}, Dependencies: ${x.depends}`));
@@ -71,4 +71,48 @@ describe('Injector Integration', () => {
     expect(injector.get('foo').result).toEqual(result);
     expect(logger.log.called).toBe(true);
   });
+
+  describe('map implementation', () => {
+    const a = {};
+    const b = {};
+    const bar = 'bar';
+    const depends = {
+      a,
+      b
+    };
+
+    it('map implementation', () => {
+      injector.factory('foo', function ({a, b}) {
+        this.a = a;
+        this.b = b;
+      }, {
+        depends
+      });
+      const result = injector.get('foo');
+      expect(result.a).toEqual(a);
+      expect(result.b).toEqual(b);
+    });
+
+    it('string compat', () => {
+      injector.register(bar, 'FOO');
+      injector.factory('foo', function ({a, b, bar}) {
+        this.a = a;
+        this.b = b;
+        this.bar = bar;
+      }, {
+        depends: {
+          a,
+          bar
+        }
+      });
+
+      const result = injector.get('foo');
+      expect(result.a).toEqual(a);
+      expect(result.b).toNotExist();
+      expect(result.bar).toEqual('FOO');
+    });
+
+  });
+
 });
+
