@@ -1,7 +1,9 @@
+--require ts-node/register
 --require babel-register
 --recursive
 --colors
 --bail
 --reporter dot
-test
-src/**/*.test.js
+test/*.{js,ts}
+src/**/*.test.{js,ts}
+--watch-extensions ts

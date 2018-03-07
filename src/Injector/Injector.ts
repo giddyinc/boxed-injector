@@ -3,7 +3,45 @@
 const assert = require('assert');
 const autoBind = require('auto-bind');
 
-class Injector {
+type IMiddlewareFunc = (x: any) => any;
+
+export interface IBaseOptions {
+  depends?: Array<string> | string | { [key: string]: any }
+}
+
+export interface IEntityMiddleware {
+  before: any[];
+  after: any[];
+}
+
+export interface IGlobalMiddlewares {
+  [key: string]: any[]
+}
+
+export interface IMiddlewares {
+  [key: string]: IEntityMiddleware
+}
+
+export interface IInstance {
+  name: string;
+  instance?: any;
+  depends: Array<string> | string | { [key: string]: any };
+}
+
+export interface IFactory extends IInstance {
+  name: string;
+  instance?: any;
+  depends: Array<string> | { [key: string]: any };
+  factory: new (...any) => IInstance;
+  options: any
+}
+
+export class Injector {
+  public instances: { [key: string]: IInstance };
+  public factories: { [key: string]: IFactory };
+  private globalStr: string;
+  private middlewares: IGlobalMiddlewares | IEntityMiddleware;
+
   constructor() {
     this.instances = {};
     this.factories = {};
@@ -16,24 +54,24 @@ class Injector {
     autoBind(this);
   }
 
-  _applyMiddleware(entity, lifecycle) {
+  private _applyMiddleware(entity, lifecycle: LifeCycle) {
     const {
       globalStr,
       middlewares
     } = this;
 
-    const entityMiddleware = middlewares[entity.name];
+    const entityMiddleware: IEntityMiddleware = middlewares[entity.name]; 
     const globalMiddleware = middlewares[globalStr];
 
     const run = middlewares => {
       middlewares.forEach(middleware => middleware(entity));
     };
 
-    if (lifecycle === 'before') {
+    if (lifecycle === LifeCycle.BEFORE) {
       if (entityMiddleware) {
         run(entityMiddleware.before);
       }
-    } else if (lifecycle === 'after') {
+    } else if (lifecycle === LifeCycle.AFTER) {
       const globalAfter = globalMiddleware
         .filter(x => {
           return (!entityMiddleware.before.includes(x) && !entityMiddleware.after.includes(x));
@@ -44,7 +82,7 @@ class Injector {
     }
   }
 
-  _ensureDistinct(name) {
+  _ensureDistinct(name: string) {
     const {
       instances,
       factories
@@ -53,7 +91,7 @@ class Injector {
     assert(instances[name] === undefined, 'Cannot overwrite a service once registered.');
   }
 
-  _initMiddleware(name) {
+  _initMiddleware(name: string) {
     const {
       globalStr,
       middleware,
@@ -69,7 +107,7 @@ class Injector {
     }
   }
 
-  unset(key) {
+  unset(key: string) {
     const {
       instances,
       factories
@@ -96,11 +134,15 @@ class Injector {
     return register(key, value);
   }
 
-  has(key) {
-    return Boolean(this.factories[key] || this.instances[key]);
+  has(key: string) {
+    const {
+      instances,
+      factories
+    } = this;
+    return Boolean(factories[key] || instances[key]);
   }
 
-  factory(name, factory, options = {}) {
+  factory(name: string, factory, options: IBaseOptions = {}) {
     const {
       _ensureDistinct,
       _initMiddleware,
@@ -132,18 +174,19 @@ class Injector {
     return this;
   }
 
-  register(name, instance, options = {}) {
+  register(name: string, instance, options: IBaseOptions = { depends: [] }) {
     const {
       _ensureDistinct,
       _initMiddleware,
       instances
     } = this;
+    let {
+      depends = []
+    } = options;
     assert(name, 'Invalid name. Instances must be registered with a valid unique string.');
 
     _ensureDistinct(name);
     _initMiddleware(name);
-
-    let depends = options.depends || [];
 
     if (!Array.isArray(depends)) {
       depends = [depends];
@@ -217,7 +260,7 @@ class Injector {
     return new Instance(...otherArgs);
   }
 
-  graph(name, nested) {
+  graph(name, nested?: boolean) {
     const {
       factories,
       has,
@@ -284,7 +327,7 @@ class Injector {
       assert(factories[name], `${name} is not yet registered! You either misspelled the name or forgot to register it.`);
       assert(typeof factories[name].factory === 'function', `${name} is not a constructor. Try declaring as an instance instead of a factory.`);
       const entity = factories[name];
-      _applyMiddleware(entity, 'before'); // run before middleware on factory - only runs once
+      _applyMiddleware(entity, LifeCycle.BEFORE); // run before middleware on factory - only runs once
       instances[name] = Object.assign({}, factories[name], {
         instance: inject(entity)
       });
@@ -292,17 +335,17 @@ class Injector {
 
     const instanceEntity = instances[name];
     if (!isFactory) {
-      _applyMiddleware(instanceEntity, 'before'); // run before middleware on instance
+      _applyMiddleware(instanceEntity, LifeCycle.BEFORE); // run before middleware on instance
     }
 
     setTimeout(() => {
-      _applyMiddleware(instanceEntity, 'after'); // run after middleware on all instances
+      _applyMiddleware(instanceEntity, LifeCycle.AFTER); // run after middleware on all instances
     });
 
     return instanceEntity.instance;
   }
 
-  middleware(name, method) {
+  middleware(name: string | IMiddlewareFunc, method?: IMiddlewareFunc) {
     const {
       _initMiddleware,
       factories,
@@ -348,3 +391,12 @@ class Injector {
 }
 
 module.exports = Injector;
+
+function isEntityMiddleware(mw: any): mw is IEntityMiddleware {
+  return Array.isArray(mw) === false;
+}
+
+enum LifeCycle {
+  BEFORE = 'before',
+  AFTER = 'after'
+}

@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "declaration": false,
+        "outDir": "dist",
+        "allowJs": false,
+        "target": "es2017",
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "module": "commonjs",
+        "lib": ["es2017", "dom"],
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "pretty": true,
+        "listEmittedFiles": false,
+        "removeComments": true
+    },
+    "include": [
+        "src"
+    ],
+    "exclude": [
+        "src/**/*.test.ts",
+        "node_modules",
+        "test"
+    ]
+}

@@ -1,8 +1,10 @@
 'use strict';
 
 const expect = require('expect');
-const sinon = require('sinon');
-const Injector = require('./Injector');
+import sinon from 'sinon';
+import { Injector } from './Injector';
+
+// const { Injector } = BInjector;
 
 /**
  * to run standalone:
@@ -10,7 +12,7 @@ const Injector = require('./Injector');
  */
 
 describe('Injector', () => {
-  let injector;
+  let injector: Injector;
   let sandbox;
   beforeEach(() => {
     injector = new Injector();
@@ -26,7 +28,7 @@ describe('Injector', () => {
   });
   describe('register', () => {
     it('should be able to register instances', () => {
-      injector.register('foo', 'bar', {depends: 'bar'});
+      injector.register('foo', 'bar', { depends: 'bar' });
       expect(injector.graph('foo')).toEqual(['bar']);
     });
 
@@ -44,8 +46,8 @@ describe('Injector', () => {
   });
 
   describe('middleware', () => {
-    let logger = {
-      log() { }
+    let logger: any = {
+      log(x) { }
     };
     beforeEach(() => {
       sandbox.stub(logger, 'log');
@@ -160,7 +162,7 @@ describe('Injector', () => {
 
       injector.factory('foo', function (txt) {
         this.bar = txt;
-      }, {depends: ['asdf']});
+      }, { depends: ['asdf'] });
 
       const result = injector.get('foo');
       expect(result.bar).toEqual('asdf');
@@ -168,22 +170,22 @@ describe('Injector', () => {
 
     it('should be able to add complex dependency graphs', () => {
       injector.register('asdf', 'asdf');
-      injector.factory('a', () => 'a', {depends: [], function: true});
+      injector.factory('a', () => 'a', { depends: [], function: true });
 
       injector.factory('b', function (txt) {
         this.bar = txt;
-      }, {depends: 'a'});
+      }, { depends: 'a' });
 
       injector.factory('x', function (txt) {
         this.bar = txt.bar;
-      }, {depends: 'b'});
+      }, { depends: 'b' });
 
-      injector.factory('c', txt => txt, {depends: ['x'], function: true});
-      injector.factory('d', l => l, {depends: ['c'], function: true});
+      injector.factory('c', txt => txt, { depends: ['x'], function: true });
+      injector.factory('d', l => l, { depends: ['c'], function: true });
 
       injector.factory('foo', function (txt) {
         this.bar = txt.bar;
-      }, {depends: ['c']});
+      }, { depends: ['c'] });
 
       const result = injector.get('foo');
       expect(result.bar).toEqual('a');
@@ -197,13 +199,13 @@ describe('Injector', () => {
     });
     it('should get a graph', () => {
       injector.register('asdf', 'asdf');
-      injector.factory('a', () => 'a', {depends: [], function: true});
-      injector.factory('g', () => 'g', {depends: [], function: true});
-      injector.factory('b', x => x, {depends: 'a', function: true});
-      injector.factory('c', x => x, {depends: ['b', 'a'], function: true});
-      injector.factory('d', x => x, {depends: 'c', function: true});
-      injector.factory('e', x => x, {depends: ['d', 'a'], function: true});
-      injector.factory('f', x => x, {depends: ['d', 'g'], function: true});
+      injector.factory('a', () => 'a', { depends: [], function: true });
+      injector.factory('g', () => 'g', { depends: [], function: true });
+      injector.factory('b', x => x, { depends: 'a', function: true });
+      injector.factory('c', x => x, { depends: ['b', 'a'], function: true });
+      injector.factory('d', x => x, { depends: 'c', function: true });
+      injector.factory('e', x => x, { depends: ['d', 'a'], function: true });
+      injector.factory('f', x => x, { depends: ['d', 'g'], function: true });
       expect(injector.graph('a')).toEqual([]);
       expect(injector.graph('asdf')).toEqual([]);
       expect(injector.graph('b')).toEqual(['a']);
@@ -236,7 +238,8 @@ describe('Injector', () => {
       function factory(foo) {
         this.foo = foo;
       }
-      factory.inject = ['foo'];
+
+      (factory as any).inject = ['foo'];
 
       injector.factory('bar', factory);
       const instance = injector.get('bar');
@@ -263,7 +266,7 @@ describe('Injector', () => {
         this.color = color;
         this.interior = interior;
       }
-      BMW.inject = ['Engine'];
+      (BMW as any).inject = ['Engine'];
       injector.register('Engine', 'foo');
       injector.register('Ferarri', BMW);
       injector.factory('BMW', BMW);
