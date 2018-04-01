@@ -5,7 +5,7 @@ import sinon from 'sinon';
 import { Injector } from './Injector';
 
 /**
- * mocha src/Injector/integration.test.js --watch
+ * mocha src/Injector/integration.test.ts --opts .mocharc --watch
  */
 
 describe('Injector Integration', () => {
@@ -69,7 +69,7 @@ describe('Injector Integration', () => {
     injector.middleware(x => console.log(`Resolved ${x.name} successfully!`));
 
     expect(injector.get('foo').result).toEqual(result);
-    expect(logger.log.called).toBe(true);
+    expect(logger.log.called).toBe(true, 'logger never called');
   });
 
   describe('map implementation', () => {
