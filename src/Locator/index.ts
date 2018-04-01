@@ -1,2 +1,6 @@
 
-module.exports = require('./Locator');
+import * as Locator from './Locator';
+
+export {
+    Locator
+};

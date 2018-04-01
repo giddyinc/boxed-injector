@@ -55,8 +55,3 @@ export interface IConstructorFactory extends IFactory, IRegisterable {
 
 export type IInstanceCreatingFunction = (...any) => IInstance;
 export type IInstanceConstructor = new (...any) => IInstance;
-
-export enum LifeCycle {
-    BEFORE = 'before',
-    AFTER = 'after'
-}

@@ -1,7 +1,10 @@
 
 'use strict';
 
-module.exports = {
-  Injector: require('./Injector'),
-  Locator: require('./Locator')
+import { Injector } from './Injector';
+import { Locator } from './Locator';
+
+export {
+  Injector,
+  Locator
 };

@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import assert from 'assert';
 import autoBind from 'auto-bind';
 import { isString, isObject } from 'util';
-import { IInstance, IFactory, IMiddlewares, IEntityMiddleware, IMapDependency, IMiddlewareFunc, IBaseOptions, IDependency, IFunctionalFactory, IInstanceConstructor, IConstructorFactory } from './intefaces';
+import { IInstance, IFactory, IMiddlewares, IEntityMiddleware, IMapDependency, IMiddlewareFunc, IBaseOptions, IDependencies, IFunctionalFactory, IInstanceConstructor, IConstructorFactory } from './interfaces';
 import { LifeCycle } from './enums';
 
 export class Injector {
@@ -181,8 +181,6 @@ export class Injector {
     return this;
   }
 
-
-
   private inject(entity: IFactory, options: { additionalArguments?: any[] } = {}): IInstance {
     const self = this;
     const {
@@ -325,7 +323,7 @@ export class Injector {
    * Overloads allow arrays or maps to be returned.
    * @param name - Dependency
    */
-  public get(name: IDependency): any {
+  public get(name: IDependencies): any {
     const {
       _applyMiddleware,
       factories,
@@ -466,6 +464,7 @@ function isFunctionalFactory(factory: any): factory is IFunctionalFactory {
   const { options = {} } = factory;
   return options.function === true;
 }
+
 function isConstructorFactory(factory: any): factory is IConstructorFactory {
   const { options = {} } = factory;
   return !options.function;

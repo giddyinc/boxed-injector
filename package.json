@@ -2,17 +2,14 @@
   "name": "boxed-injector",
   "version": "1.1.2",
   "description": "Dependency Injection Tools",
-  "homepage": "",
   "author": {
     "name": "Ben Lugavere",
-    "email": "b.lugavere@gmail.com",
-    "url": ""
+    "email": "b.lugavere@gmail.com"
   },
   "files": [
-    "dist",
-    "boxed-injector.d.ts"
+    "dist"
   ],
-  "typings": "boxed-injector.d.ts",
+  "typings": "dist/index",
   "main": "dist/index.js",
   "keywords": [
     "injector",

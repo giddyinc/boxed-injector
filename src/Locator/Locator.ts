@@ -1,7 +1,7 @@
 
 'use strict';
 
-import { Injector } from "../Injector/Injector";
+import { Injector } from '../Injector/Injector';
 
 /**
  * This should always be a temporary workaround. Globals are bad mmmkay!
