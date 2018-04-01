@@ -4,7 +4,7 @@ clean:
 	rm -rf coverage dist .nyc_output
 
 test: lint
-	NODE_ENV=test ./node_modules/.bin/nyc ./node_modules/.bin/mocha --opts .mocharc
+	NODE_ENV=test ./node_modules/.bin/nyc ./node_modules/.bin/mocha test/*.ts src/**/*.test.ts --opts .mocharc
 
 coverage:
 	./node_modules/.bin/nyc report --reporter=text-lcov | coveralls
@@ -20,3 +20,6 @@ lint:
 
 dev:
 	./node_modules/.bin/babel src --out-dir dist --watch
+
+
+

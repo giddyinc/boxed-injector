@@ -3,6 +3,17 @@
 import expect from 'expect';
 import sinon from 'sinon';
 import { Injector } from './Injector';
+import {
+  Stereo,
+  Boat,
+  Bose,
+  Car,
+  types,
+  PREFERRED_COLOR,
+  PREFERRED_VOLUME,
+  Motorcycle,
+  Jetski,
+} from '../../test/entities';
 
 /**
  * to run standalone:
@@ -235,6 +246,91 @@ describe('Injector', () => {
   });
 
   describe('get', () => {
+    it('array, string, and map api', () => {
+      injector.register(types.COLOR_CONFIG, PREFERRED_COLOR);
+      injector.register(types.VOLUME_CONFIG, PREFERRED_VOLUME);
+      
+      //#region array
+      injector.factory(types.Stereo, Stereo);
+      injector.factory(types.Bose, Bose, {
+        depends: [
+          types.VOLUME_CONFIG,
+          types.COLOR_CONFIG
+        ]
+      });
+      //#endregion array
+      //#region string
+      injector.factory(types.Motorcycle, Motorcycle, {
+        depends: types.Bose
+      });
+
+      injector.factory(types.Car, Car);
+      //#endregion string
+
+      //#region map
+      injector.factory(types.Jetski, Jetski);
+      injector.factory(types.Boat, Boat, {
+        depends: {
+          stereo: types.Bose,
+          color: types.COLOR_CONFIG
+        }
+      });
+      
+      //#endregion map
+
+      // inject array api
+      const stereo = injector.get(types.Stereo);
+      expect(stereo.volume).toEqual(PREFERRED_VOLUME);
+      expect(stereo.color).toEqual(PREFERRED_COLOR);
+      const bose = injector.get(types.Bose);
+      expect(bose.volume).toEqual(PREFERRED_VOLUME);
+      expect(bose.color).toEqual(PREFERRED_COLOR);
+
+      // inject string api
+      const car = injector.get(types.Car);
+      expect(car.stereo).toEqual(bose);
+      const motorcycle = injector.get(types.Motorcycle);
+      expect(motorcycle.stereo).toEqual(bose);
+
+      // get array api
+      const [ a, b ] = injector.get([types.Car, types.Motorcycle]);
+      expect(a).toEqual(car);
+      expect(b).toEqual(motorcycle);
+
+      const {
+        foo,
+        bar
+      } = injector.get({
+        foo: types.Car,
+        bar: types.Motorcycle
+      });
+      expect(foo).toEqual(car);
+      expect(bar).toEqual(motorcycle);
+
+      // inject map api
+      const boat = injector.get(types.Boat);
+      expect(boat.stereo).toEqual(bose);
+      expect(boat.color).toEqual(PREFERRED_COLOR);
+
+      const jetski = injector.get(types.Jetski);
+      expect(jetski.stereo).toEqual(bose);
+      expect(jetski.color).toEqual(PREFERRED_COLOR);
+
+
+      // expect(motorcycle.stereo).toEqual(bose);
+      
+      // console.log(injector.factories);
+
+      // injector.factory('baz', );
+      // const boat = injector.get(types.Boat);
+      // expect(boat.color).toEqual(PREFERRED_COLOR);
+      // expect(boat.stereo).toEqual(stereo);
+
+    });
+
+
+
+    
     it('should be able to get registered instances', () => {
       injector.register('foo', 'bar');
       expect(injector.get('foo')).toEqual('bar', 'was expecting to be able to get registered instances.');
@@ -299,6 +395,38 @@ describe('Injector', () => {
       expect(instance2.engine).toBe('foo');
       expect(instance2.interior).toBe('leather');
     });
+
+    it('should create an instance of a using the object api', () => {
+      function Mercedes({engine, daFunk}, color, interior) {
+        this.make = 'CL500';
+        this.daFunk = daFunk;
+        this.engine = engine;
+        this.color = color;
+        this.interior = interior;
+      }
+
+      const myObjectLiteral = {};
+
+      (Mercedes as any).inject = {
+        engine: 'Engine',
+        daFunk: myObjectLiteral
+      };
+
+      const type = 'Mercedes';
+      injector.factory(type, Mercedes);
+
+      const instance1 = injector.create(type, 'black');
+      const instance2 = injector.create(type, ['white', 'leather']);
+      expect(instance1.make).toBe('CL500');
+      expect(instance1.engine).toBe('foo');
+      expect(instance2.engine).toBe('foo');
+      expect(instance1.daFunk).toEqual(myObjectLiteral);
+      expect(instance1.color).toBe('black');
+      expect(instance2.make).toBe('CL500');
+      expect(instance2.color).toBe('white');
+      expect(instance2.interior).toBe('leather');
+    });
+
     it('should create an instance of a factory with multiple args instead of array', () => {
       const instance1 = injector.create('BMW', 'black');
       const instance2 = injector.create('BMW', 'white', 'leather');
