@@ -1,16 +1,19 @@
+
 'use strict';
 
+import { Injector } from "../Injector/Injector";
+
 /**
- * This is a temporary workaround. Globals are bad mmmkay!
+ * This should always be a temporary workaround. Globals are bad mmmkay!
  */
 
-let _instance;
+let _instance: Injector;
 
-module.exports.set = function (injector) {
+export const set = (injector: Injector): void => {
   _instance = injector;
 };
 
-module.exports.get = function () {
+export const get = (): Injector => {
   if (!_instance) {
     console.error(`
       Injector has not yet been registered in the service locator. 

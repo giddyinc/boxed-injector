@@ -1,8 +1,8 @@
 'use strict';
 
-const expect = require('expect');
-const Injector = require('./Injector');
-const sinon = require('sinon');
+import expect from 'expect';
+import sinon from 'sinon';
+import { Injector } from './Injector';
 
 /**
  * mocha src/Injector/integration.test.js --watch

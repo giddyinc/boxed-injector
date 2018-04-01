@@ -1,7 +1,7 @@
 'use strict';
 
-const assert = require('assert');
-const autoBind = require('auto-bind');
+import assert from 'assert';
+import autoBind from 'auto-bind';
 
 type IMiddlewareFunc = (x: any) => any;
 
@@ -60,7 +60,7 @@ export class Injector {
       middlewares
     } = this;
 
-    const entityMiddleware: IEntityMiddleware = middlewares[entity.name]; 
+    const entityMiddleware: IEntityMiddleware = middlewares[entity.name];
     const globalMiddleware = middlewares[globalStr];
 
     const run = middlewares => {
@@ -294,7 +294,6 @@ export class Injector {
 
       add(elem);
       const child = this.graph(elem, true);
-      console.log('this bout to fail', child);
       child.all.forEach(childDep => {
         add(childDep);
       });
@@ -389,8 +388,6 @@ export class Injector {
   }
 
 }
-
-module.exports = Injector;
 
 function isEntityMiddleware(mw: any): mw is IEntityMiddleware {
   return Array.isArray(mw) === false;

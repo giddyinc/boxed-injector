@@ -1,33 +1,36 @@
 'use strict';
-const expect = require('expect');
-const Injector = require('../Injector/Injector');
+
+import expect from 'expect';
+import { Injector } from "../Injector/Injector";
+import {
+  get,
+  set
+} from './Locator';
 
 /**
  * to run standalone:
- * mocha --require babel-register src/Locator/Locator.test.js --watch
+ * mocha src/Locator/Locator.test.ts --opts .mocharc --watch
  */
 
 describe('Locator', () => {
-  let injector;
-  let store;
+  let injector: Injector;
 
   before(() => {
     injector = new Injector();
-    store = require('./Locator');
   });
 
   it('should throw if you get it without setting', () => {
-    expect(store.get).toThrow(Error);
+    expect(get).toThrow(Error);
   });
 
   it('should expose a global setter', () => {
-    expect(typeof store.set).toBe('function');
-    store.set(injector);
-    expect(typeof store.get()).toBe('object', 'not returning object');
+    expect(typeof set).toBe('function');
+    set(injector);
+    expect(typeof get()).toBe('object', 'not returning object');
   });
 
   it('should expose a global injector instance', () => {
-    expect(store.get() instanceof Injector).toBe(true, 'getter method not working');
+    expect(get() instanceof Injector).toBe(true, 'getter method not working');
   });
 
   it('should be able to be required after-the-fact', () => {

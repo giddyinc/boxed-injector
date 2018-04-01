@@ -1,0 +1,17 @@
+{
+  "include": [
+    "src/**/*.ts"
+  ],
+  "sourceMap": true,
+  "instrument": true,
+  "require": [
+    "ts-node/register",
+    "source-map-support/register"
+  ],
+  "extension": [
+    ".ts"
+  ],
+  "exclude": [
+    "src/**/*.test.ts"
+  ]
+}

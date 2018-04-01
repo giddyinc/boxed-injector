@@ -1,10 +1,8 @@
 'use strict';
 
-const expect = require('expect');
+import expect from 'expect';
 import sinon from 'sinon';
-import Injector from './Injector';
-
-// const { Injector } = BInjector;
+import { Injector } from './Injector';
 
 /**
  * to run standalone:
