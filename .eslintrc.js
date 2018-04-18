@@ -1,7 +1,8 @@
 module.exports = {
   "extends": "xo-space",
   "env": {
-    "mocha": true
+    "mocha": true,
+    "node": true
   },
   "parserOptions": {
     "ecmaFeatures": {
@@ -15,6 +16,7 @@ module.exports = {
     "quotes": [2, "single"],
     "no-multiple-empty-lines": 1,
     "prefer-destructuring": 1,
-    "eol-last": 0
+    "eol-last": 0,
+    "padded-blocks": 0
   }
 }

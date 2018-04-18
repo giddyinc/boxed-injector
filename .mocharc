@@ -1,7 +1,8 @@
---require babel-register
+--require ts-node/register
+--require source-map-support/register
 --recursive
 --colors
---bail
 --reporter dot
-test
-src/**/*.test.js
+test/*.ts
+src/**/*.test.ts
+--watch-extensions ts

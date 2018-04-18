@@ -1,16 +1,16 @@
 'use strict';
 
-const expect = require('expect');
-const sinon = require('sinon');
-const Injector = require('./Injector');
+import expect from 'expect';
+import sinon from 'sinon';
+import { Injector } from './Injector';
 
 /**
  * to run standalone:
- * mocha --require babel-register src/Injector/Injector.test.js --watch
+ * mocha src/Injector/Injector.test.ts --opts .mocharc --watch
  */
 
 describe('Injector', () => {
-  let injector;
+  let injector: Injector;
   let sandbox;
   beforeEach(() => {
     injector = new Injector();
@@ -26,7 +26,7 @@ describe('Injector', () => {
   });
   describe('register', () => {
     it('should be able to register instances', () => {
-      injector.register('foo', 'bar', {depends: 'bar'});
+      injector.register('foo', 'bar', { depends: 'bar' });
       expect(injector.graph('foo')).toEqual(['bar']);
     });
 
@@ -44,43 +44,44 @@ describe('Injector', () => {
   });
 
   describe('middleware', () => {
-    let logger = {
-      log() { }
+    const logger: any = {
+      log(x) { }
     };
     beforeEach(() => {
       sandbox.stub(logger, 'log');
     });
     it('should be able to register middlewares - before', () => {
-      injector.middleware('foo', x => logger.log(x));
-      injector.middleware(x => logger.log(x));
+      injector.middleware('foo', (x) => logger.log(x));
+      injector.middleware((x) => logger.log(x));
       injector.register('foo', 'bar');
-      expect(injector.middlewares.foo).toExist('expected middleware to exist');
-      expect(Array.isArray(injector.middlewares.foo.after)).toBe(true, 'expected middleware to be an array');
-      expect(injector.middlewares.foo.after.length).toBe(0);
-      expect(injector.middlewares.__global__.length).toBe(1);
+      const { middlewares }: any = injector;
+      expect(middlewares.foo).toExist('expected middleware to exist');
+      expect(Array.isArray(middlewares.foo.after)).toBe(true, 'expected middleware to be an array');
+      expect(middlewares.foo.after.length).toBe(0, 'foo after length should be 0; both middlewares were registered before');
+      expect(middlewares.__global__.before.length).toBe(1);
     });
 
     it('should be able to register middlewares - after', () => {
       injector.register('foo', 'bar');
-      injector.middleware(x => logger.log(x));
-      injector.middleware('foo', x => logger.log(x));
+      injector.middleware((x) => logger.log(x));
+      injector.middleware('foo', (x) => logger.log(x));
       expect(injector.middlewares.foo).toExist('expected middleware to exist');
       expect(Array.isArray(injector.middlewares.foo.after)).toBe(true, 'expected middleware to be an array');
-      expect(injector.middlewares.foo.before.length).toBe(0);
-      expect(injector.middlewares.__global__.length).toBe(1);
+      expect(injector.middlewares.foo.before.length).toBe(0, 'should be able to register middleware before');
     });
 
     it('should run middleware on get - global before', () => {
       injector.middleware(() => logger.log('bar'));
-      injector.factory('foo', function () {
+      injector.factory('foo', function() {
         return 'bar';
       });
       injector.get('foo');
       expect(logger.log.called).toBe(true);
       expect(logger.log.calledWith('bar')).toBe(true, 'was expecting console log to log x.');
     });
-    it('should run middleware on get - global after', done => {
-      injector.factory('foo', function () {
+
+    it('should run middleware on get - global after', (done) => {
+      injector.factory('foo', function() {
         return 'bar';
       });
       injector.middleware(() => logger.log('bar'));
@@ -91,17 +92,18 @@ describe('Injector', () => {
         done();
       }, 10);
     });
+
     it('should run middleware on get - entity before', () => {
       injector.middleware('foo', () => logger.log('bar'));
-      injector.factory('foo', function () {
+      injector.factory('foo', function() {
         return 'bar';
       });
       injector.get('foo');
       expect(logger.log.called).toBe(true);
       expect(logger.log.calledWith('bar')).toBe(true, 'was expecting console log to log x.');
     });
-    it('should run middleware on get - entity after', done => {
-      injector.factory('foo', function () {
+    it('should run middleware on get - entity after', (done) => {
+      injector.factory('foo', function() {
         return 'bar';
       });
       injector.middleware('foo', () => logger.log('bar'));
@@ -113,10 +115,10 @@ describe('Injector', () => {
       }, 10);
     });
 
-    it('should run middleware in the correct order', done => {
+    it('should run middleware in the correct order', (done) => {
       injector.middleware(() => logger.log('beforeGlobal'));
       injector.middleware('foo', () => logger.log('beforeEntity'));
-      injector.factory('foo', function () {
+      injector.factory('foo', function() {
         return 'bar';
       });
       injector.middleware(() => logger.log('afterGlobal'));
@@ -142,14 +144,14 @@ describe('Injector', () => {
   });
   describe('_applyMiddleware', () => {
     it('should fail if not passed valid arg', () => {
-      expect(() => injector._applyMiddleware.call(null, [{
+      expect(() => (injector as any)._applyMiddleware.call(null, [{
         name: 'foo'
       }, 'baz'])).toThrow(Error, 'was expecting an error to be thrown.');
     });
   });
   describe('factory', () => {
     it('should be able to register factories', () => {
-      injector.factory('foo', function () {
+      injector.factory('foo', function() {
         this.bar = 'baz';
       });
       expect(injector.factories.foo.factory).toExist('was expecting to be able to get registered instances.');
@@ -158,9 +160,9 @@ describe('Injector', () => {
     it('should be able to add dependencies inline', () => {
       injector.register('asdf', 'asdf');
 
-      injector.factory('foo', function (txt) {
+      injector.factory('foo', function(txt) {
         this.bar = txt;
-      }, {depends: ['asdf']});
+      }, { depends: ['asdf'] });
 
       const result = injector.get('foo');
       expect(result.bar).toEqual('asdf');
@@ -168,22 +170,22 @@ describe('Injector', () => {
 
     it('should be able to add complex dependency graphs', () => {
       injector.register('asdf', 'asdf');
-      injector.factory('a', () => 'a', {depends: [], function: true});
+      injector.factory('a', () => 'a', { depends: [], function: true });
 
-      injector.factory('b', function (txt) {
+      injector.factory('b', function(txt) {
         this.bar = txt;
-      }, {depends: 'a'});
+      }, { depends: 'a' });
 
-      injector.factory('x', function (txt) {
+      injector.factory('x', function(txt) {
         this.bar = txt.bar;
-      }, {depends: 'b'});
+      }, { depends: 'b' });
 
-      injector.factory('c', txt => txt, {depends: ['x'], function: true});
-      injector.factory('d', l => l, {depends: ['c'], function: true});
+      injector.factory('c', (txt) => txt, { depends: ['x'], function: true });
+      injector.factory('d', (l) => l, { depends: ['c'], function: true });
 
-      injector.factory('foo', function (txt) {
+      injector.factory('foo', function(txt) {
         this.bar = txt.bar;
-      }, {depends: ['c']});
+      }, { depends: ['c'] });
 
       const result = injector.get('foo');
       expect(result.bar).toEqual('a');
@@ -197,13 +199,21 @@ describe('Injector', () => {
     });
     it('should get a graph', () => {
       injector.register('asdf', 'asdf');
-      injector.factory('a', () => 'a', {depends: [], function: true});
-      injector.factory('g', () => 'g', {depends: [], function: true});
-      injector.factory('b', x => x, {depends: 'a', function: true});
-      injector.factory('c', x => x, {depends: ['b', 'a'], function: true});
-      injector.factory('d', x => x, {depends: 'c', function: true});
-      injector.factory('e', x => x, {depends: ['d', 'a'], function: true});
-      injector.factory('f', x => x, {depends: ['d', 'g'], function: true});
+      injector.factory('a', () => 'a', { depends: [], function: true });
+      injector.factory('g', () => 'g', { depends: [], function: true });
+      injector.factory('b', (x) => x, { depends: 'a', function: true });
+      injector.factory('c', (x) => x, { depends: ['b', 'a'], function: true });
+      injector.factory('d', (x) => x, { depends: 'c', function: true });
+      injector.factory('e', (x) => x, { depends: ['d', 'a'], function: true });
+      injector.factory('f', (x) => x, { depends: ['d', 'g'], function: true });
+      
+      const d = 'd';
+      const g = 'g';
+      
+      injector.factory('j', (x) => x, { depends: {
+        d, g
+      }, function: true });
+
       expect(injector.graph('a')).toEqual([]);
       expect(injector.graph('asdf')).toEqual([]);
       expect(injector.graph('b')).toEqual(['a']);
@@ -212,6 +222,15 @@ describe('Injector', () => {
       expect(Array.isArray(eResult)).toBe(true);
       expect(eResult).toEqual(['d', 'c', 'b', 'a']);
       expect(injector.graph(['e', 'f'])).toEqual(['d', 'c', 'b', 'a', 'g']);
+
+      // console.log(injector.graph('f'));
+      // console.log(injector.graph('j'));
+
+      // expect(
+      //   injector.graph('j')
+      // ).toEqual(
+      //   injector.graph('f')
+      // );
     });
   });
 
@@ -221,7 +240,7 @@ describe('Injector', () => {
       expect(injector.get('foo')).toEqual('bar', 'was expecting to be able to get registered instances.');
     });
     it('should be able to get registered factories', () => {
-      injector.factory('foo', function () {
+      injector.factory('foo', function() {
         this.bar = 'baz';
       });
       expect(injector.get('foo').bar).toEqual('baz', 'was expecting to be able to get registered instances.');
@@ -236,7 +255,8 @@ describe('Injector', () => {
       function factory(foo) {
         this.foo = foo;
       }
-      factory.inject = ['foo'];
+
+      (factory as any).inject = ['foo'];
 
       injector.factory('bar', factory);
       const instance = injector.get('bar');
@@ -246,12 +266,12 @@ describe('Injector', () => {
 
   describe('_ensureDistinct', () => {
     it('should throw an error if you try to overwrite a factory with another factory', () => {
-      injector.factory('nonunique', function () { });
-      expect(() => injector.factory('nonunique', function () { })).toThrow();
+      injector.factory('nonunique', function() { });
+      expect(() => injector.factory('nonunique', function() { })).toThrow();
     });
     it('should throw an error if you try to overwrite a factory output with a service', () => {
-      injector.factory('nonunique', function () { });
-      expect(() => injector.register('nonunique', function () { })).toThrow();
+      injector.factory('nonunique', function() { });
+      expect(() => injector.register('nonunique', function() { })).toThrow();
     });
   });
 
@@ -263,7 +283,7 @@ describe('Injector', () => {
         this.color = color;
         this.interior = interior;
       }
-      BMW.inject = ['Engine'];
+      (BMW as any).inject = ['Engine'];
       injector.register('Engine', 'foo');
       injector.register('Ferarri', BMW);
       injector.factory('BMW', BMW);

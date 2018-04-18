@@ -1,11 +1,11 @@
 'use strict';
 
-const expect = require('expect');
-const Injector = require('./Injector');
-const sinon = require('sinon');
+import expect from 'expect';
+import sinon from 'sinon';
+import { Injector } from './Injector';
 
 /**
- * mocha src/Injector/integration.test.js --watch
+ * mocha src/Injector/integration.test.ts --opts .mocharc --watch
  */
 
 describe('Injector Integration', () => {
@@ -49,7 +49,7 @@ describe('Injector Integration', () => {
   it('should enable middleware', () => {
     const result = 'baz';
     const logger = {
-      log() {}
+      log() { }
     };
     sandbox.stub(logger);
     injector.middleware(x => console.log(`Resolving ${x.name}, Dependencies: ${x.depends}`));
@@ -69,6 +69,50 @@ describe('Injector Integration', () => {
     injector.middleware(x => console.log(`Resolved ${x.name} successfully!`));
 
     expect(injector.get('foo').result).toEqual(result);
-    expect(logger.log.called).toBe(true);
+    expect(logger.log.called).toBe(true, 'logger never called');
   });
+
+  describe('map implementation', () => {
+    const a = {};
+    const b = {};
+    const bar = 'bar';
+    const depends = {
+      a,
+      b
+    };
+
+    it('map implementation', () => {
+      injector.factory('foo', function ({a, b}) {
+        this.a = a;
+        this.b = b;
+      }, {
+        depends
+      });
+      const result = injector.get('foo');
+      expect(result.a).toEqual(a);
+      expect(result.b).toEqual(b);
+    });
+
+    it('string compat', () => {
+      injector.register(bar, 'FOO');
+      injector.factory('foo', function ({a, b, bar}) {
+        this.a = a;
+        this.b = b;
+        this.bar = bar;
+      }, {
+        depends: {
+          a,
+          bar
+        }
+      });
+
+      const result = injector.get('foo');
+      expect(result.a).toEqual(a);
+      expect(result.b).toNotExist();
+      expect(result.bar).toEqual('FOO');
+    });
+
+  });
+
 });
+

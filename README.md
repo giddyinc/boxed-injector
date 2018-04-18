@@ -101,9 +101,10 @@ const car = injector.create('Car', ['blue']);
 
 ## Middleware
 Middleware functions are executed every time a service is accessed from the container (or on a factory, the first time it's accessed). 
-Global middleware as well as service/factory specific middleware is supported and is executed in the order of registry (FIFO).
+Global middlewares as well as service / factory specific middlewares are supported and are executed in the order of registry (FIFO).
 Note that registered instances are singletons and mutations will affect all consumers.
-Middleware is synchronous, and is passed an object as follows:
+
+Middlewares are synchronous, and is passed an object as follows:
 
 ```js
 {
