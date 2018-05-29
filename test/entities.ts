@@ -1,4 +1,4 @@
-import { IDependency } from '../src/Injector/intefaces';
+import { IDependencies } from '../src/Injector/interfaces';
 
 export const types = {
     Bose: 'Bose',
@@ -16,7 +16,7 @@ export const PREFERRED_VOLUME = 'loud';
 
 //#region array
 export class Stereo {
-    static get inject(): IDependency {
+    static get inject(): IDependencies {
         return [
             types.VOLUME_CONFIG,
             types.COLOR_CONFIG
@@ -36,11 +36,8 @@ export class Bose {
 }
 //#endregion array
 
-
-
-
 export class Car {
-    static get inject(): IDependency {
+    static get inject(): IDependencies {
         return types.Bose;
     }
     constructor(private stereo: Stereo) {}
@@ -58,7 +55,7 @@ export class Boat {
     }
 }
 export class Jetski {
-    static get inject(): IDependency {
+    static get inject(): IDependencies {
         return {
             stereo: types.Bose,
             color: types.COLOR_CONFIG

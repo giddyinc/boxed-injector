@@ -1,7 +1,7 @@
 'use strict';
 
 import expect from 'expect';
-import sinon from 'sinon';
+import sinon, { SinonSandbox, SinonStubbedInstance } from 'sinon';
 import { Injector } from './Injector';
 
 /**
@@ -9,15 +9,20 @@ import { Injector } from './Injector';
  */
 
 describe('Injector Integration', () => {
-  let injector;
-  let sandbox;
+  let injector: Injector;
+  let sandbox: SinonSandbox;
+  let logger: SinonStubbedInstance<Console>;
+
   beforeEach(() => {
+    sandbox = sinon.createSandbox();
     injector = new Injector();
-    sandbox = sinon.sandbox.create();
+    logger = sandbox.createStubInstance(console.Console);
   });
+
   afterEach(() => {
     sandbox.restore();
   });
+
   it('should work with instances', () => {
     const result = 'bar';
     injector.register('foo', result);
@@ -40,7 +45,7 @@ describe('Injector Integration', () => {
     function foo(baz) {
       this.result = baz;
     }
-    foo.inject = ['baz'];
+    (foo as any).inject = ['baz'];
     injector.register('baz', result);
     injector.factory('foo', foo);
     expect(injector.get('foo').result).toEqual(result);
@@ -48,25 +53,22 @@ describe('Injector Integration', () => {
 
   it('should enable middleware', () => {
     const result = 'baz';
-    const logger = {
-      log() { }
-    };
-    sandbox.stub(logger);
-    injector.middleware(x => console.log(`Resolving ${x.name}, Dependencies: ${x.depends}`));
+    injector.middleware((x) => logger.log(`Resolving ${x.name}, Dependencies: ${x.depends}`));
 
     injector.middleware(() => logger.log());
     function baz(barley) {
       this.barley = barley;
     }
-    baz.inject = ['barley'];
+    (baz as any).inject = ['barley'];
     function foo(baz) {
       this.result = baz.barley;
     }
-    foo.inject = ['baz'];
+    (foo as any).inject = ['baz'];
     injector.register('barley', result);
     injector.factory('baz', baz);
     injector.factory('foo', foo);
-    injector.middleware(x => console.log(`Resolved ${x.name} successfully!`));
+    // tslint:disable-next-line:no-console
+    injector.middleware((x) => console.log(`Resolved ${x.name} successfully!`));
 
     expect(injector.get('foo').result).toEqual(result);
     expect(logger.log.called).toBe(true, 'logger never called');
@@ -82,7 +84,7 @@ describe('Injector Integration', () => {
     };
 
     it('map implementation', () => {
-      injector.factory('foo', function ({a, b}) {
+      injector.factory('foo', function({a, b}) {
         this.a = a;
         this.b = b;
       }, {
@@ -95,7 +97,7 @@ describe('Injector Integration', () => {
 
     it('string compat', () => {
       injector.register(bar, 'FOO');
-      injector.factory('foo', function ({a, b, bar}) {
+      injector.factory('foo', function({a, b, bar}) {
         this.a = a;
         this.b = b;
         this.bar = bar;
@@ -115,4 +117,3 @@ describe('Injector Integration', () => {
   });
 
 });
-

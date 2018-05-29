@@ -1,7 +1,7 @@
 'use strict';
 
 import expect from 'expect';
-import sinon from 'sinon';
+import sinon, { SinonSandbox, SinonStubbedInstance } from 'sinon';
 import { Injector } from './Injector';
 import {
   Stereo,
@@ -22,10 +22,13 @@ import {
 
 describe('Injector', () => {
   let injector: Injector;
-  let sandbox;
+  let sandbox: SinonSandbox;
+  let logger: SinonStubbedInstance<Console>;
+
   beforeEach(() => {
     injector = new Injector();
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.createSandbox();
+    logger = sandbox.createStubInstance(console.Console);
   });
   afterEach(() => {
     sandbox.restore();
@@ -43,24 +46,18 @@ describe('Injector', () => {
 
     it('should be able to register instances', () => {
       injector.register('foo', 'bar');
-      expect(injector.instances.foo.instance).toEqual('bar', 'was expecting to be able to register instances.');
+      expect((injector as any).instances.foo.instance).toEqual('bar', 'was expecting to be able to register instances.');
     });
 
     it('should be able to register booleans', () => {
       injector.register('foo', true);
       injector.register('bar', false);
-      expect(injector.instances.foo.instance).toEqual(true, 'was expecting to be able to register true bool.');
-      expect(injector.instances.bar.instance).toEqual(false, 'was expecting to be able to register false bool.');
+      expect((injector as any).instances.foo.instance).toEqual(true, 'was expecting to be able to register true bool.');
+      expect((injector as any).instances.bar.instance).toEqual(false, 'was expecting to be able to register false bool.');
     });
   });
 
   describe('middleware', () => {
-    const logger: any = {
-      log(x) { }
-    };
-    beforeEach(() => {
-      sandbox.stub(logger, 'log');
-    });
     it('should be able to register middlewares - before', () => {
       injector.middleware('foo', (x) => logger.log(x));
       injector.middleware((x) => logger.log(x));
@@ -76,9 +73,9 @@ describe('Injector', () => {
       injector.register('foo', 'bar');
       injector.middleware((x) => logger.log(x));
       injector.middleware('foo', (x) => logger.log(x));
-      expect(injector.middlewares.foo).toExist('expected middleware to exist');
-      expect(Array.isArray(injector.middlewares.foo.after)).toBe(true, 'expected middleware to be an array');
-      expect(injector.middlewares.foo.before.length).toBe(0, 'should be able to register middleware before');
+      expect((injector as any).middlewares.foo).toExist('expected middleware to exist');
+      expect(Array.isArray((injector as any).middlewares.foo.after)).toBe(true, 'expected middleware to be an array');
+      expect((injector as any).middlewares.foo.before.length).toBe(0, 'should be able to register middleware before');
     });
 
     it('should run middleware on get - global before', () => {
@@ -165,7 +162,7 @@ describe('Injector', () => {
       injector.factory('foo', function() {
         this.bar = 'baz';
       });
-      expect(injector.factories.foo.factory).toExist('was expecting to be able to get registered instances.');
+      expect((injector as any).factories.foo.factory).toExist('was expecting to be able to get registered instances.');
     });
 
     it('should be able to add dependencies inline', () => {
@@ -362,11 +359,15 @@ describe('Injector', () => {
 
   describe('_ensureDistinct', () => {
     it('should throw an error if you try to overwrite a factory with another factory', () => {
+      // tslint:disable-next-line:no-empty
       injector.factory('nonunique', function() { });
+      // tslint:disable-next-line:no-empty
       expect(() => injector.factory('nonunique', function() { })).toThrow();
     });
     it('should throw an error if you try to overwrite a factory output with a service', () => {
+      // tslint:disable-next-line:no-empty
       injector.factory('nonunique', function() { });
+      // tslint:disable-next-line:no-empty
       expect(() => injector.register('nonunique', function() { })).toThrow();
     });
   });
