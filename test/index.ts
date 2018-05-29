@@ -2,7 +2,7 @@
 'use strict';
 
 import expect from 'expect';
-import { Injector, Locator } from '..';
+import { Injector, Locator } from '../src';
 
 // mocha test/index.ts --opts .mocharc --watch
 
