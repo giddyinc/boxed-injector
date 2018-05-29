@@ -5,10 +5,10 @@ export interface IMapDependency {
     [key: string]: any;
 }
 
-export type IDependency = string[] | string | IMapDependency;
+export type IDependencies = string[] | string | IMapDependency;
 
 export interface IBaseOptions {
-    depends?: IDependency;
+    depends?: IDependencies;
     function?: boolean;
 }
 
@@ -33,20 +33,25 @@ export interface IRegisterable {
 export interface IInstance extends IRegisterable {
     name: string;
     instance?: any;
-    depends: string[] | string | { [key: string]: any };
+    depends: IDependencies;
     /**
      * Origin Factory
      */
-    factory?: new (...any) => IInstance;
+    factory?: IInstanceConstructor | IInstanceCreatingFunction;
 }
 
 export interface IFactory extends IInstance, IRegisterable {
     instance?: any;
-    depends: string[] | { [key: string]: any };
-    factory: new (...any) => IInstance;
+    depends: IDependencies;
 }
 
-export enum LifeCycle {
-    BEFORE = 'before',
-    AFTER = 'after'
+export interface IFunctionalFactory extends IFactory, IRegisterable {
+    factory: IInstanceCreatingFunction;
 }
+
+export interface IConstructorFactory extends IFactory, IRegisterable {
+    factory: IInstanceConstructor;
+}
+
+export type IInstanceCreatingFunction = (...any) => IInstance;
+export type IInstanceConstructor = new (...any) => IInstance;

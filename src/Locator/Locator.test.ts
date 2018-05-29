@@ -1,7 +1,7 @@
 'use strict';
 
 import expect from 'expect';
-import { Injector } from "../Injector/Injector";
+import { Injector } from '../Injector/Injector';
 import {
   get,
   set

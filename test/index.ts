@@ -1,9 +1,19 @@
 
 'use strict';
 
-const expect = require('expect');
+import expect from 'expect';
+import { Injector, Locator } from '../src';
 
-describe('boxed-injector', function () {
+// mocha test/index.ts --opts .mocharc --watch
+
+describe('boxed-injector', () => {
+  describe('sanity', () => {
+    it('should work', () => {
+      const injector = new Injector();
+      expect(Locator.get).toExist();
+      expect(Locator.set).toExist();
+    });
+  });
   describe('export', () => {
     let mod;
     beforeEach(() => {

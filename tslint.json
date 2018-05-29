@@ -2,6 +2,7 @@
   "defaultSeverity": "error",
   "extends": ["tslint:recommended"],
   "rules": {
+    "no-console": true,
     "max-classes-per-file": false,
     "member-ordering": false,
     "quotemark": [true, "single"],
@@ -9,9 +10,7 @@
     "ordered-imports": false,
     "variable-name": false,
     "object-literal-sort-keys": false,
-    "prefer-destructuring": true,
     "prefer-object-spread": true,
-    "no-console": false,
     "trailing-comma": false,
     "no-shadowed-variable": false,
     "no-unused-expression": false,

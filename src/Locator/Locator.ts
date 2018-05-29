@@ -1,7 +1,7 @@
 
 'use strict';
 
-import { Injector } from "../Injector/Injector";
+import { Injector } from '../Injector/Injector';
 
 /**
  * This should always be a temporary workaround. Globals are bad mmmkay!
@@ -15,6 +15,7 @@ export const set = (injector: Injector): void => {
 
 export const get = (): Injector => {
   if (!_instance) {
+    // tslint:disable-next-line:no-console
     console.error(`
       Injector has not yet been registered in the service locator. 
       Ensure Locator.set(injector); is called prior to Locator.get. 

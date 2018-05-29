@@ -1,2 +1,9 @@
 
-module.exports = require('./Injector');
+import {
+    Injector
+} from './Injector';
+
+export {
+    Injector
+};
+
