@@ -231,8 +231,6 @@ export class Injector {
 
     const deps = [...arg, ...otherArgs];
 
-    console.log(deps);
-
     if (factories[name]) {
       const entity = factories[name];
       return self.inject(entity, {
