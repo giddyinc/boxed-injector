@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "declaration": false,
+        "declaration": true,
         "outDir": "dist",
         "allowJs": false,
         "target": "es2017",
