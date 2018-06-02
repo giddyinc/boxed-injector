@@ -6,8 +6,6 @@
     "coverage/**": true
   },
   "files.exclude": {
-      "node_modules/": true,
-      ".vscode/": true,
       ".gitattributes": true,
       "LICENSE": true,
       "coverage": true

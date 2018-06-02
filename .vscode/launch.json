@@ -15,7 +15,10 @@
     "request": "launch",
     "program": "${workspaceRoot}/node_modules/.bin/_mocha",
     "stopOnEntry": false,
-    "args": ["${file}", "--debug"],
+    "args": [
+      "${file}", "--debug",
+      "--opts", ".mocharc"
+  ],
     "cwd": "${workspaceRoot}",
     "preLaunchTask": null,
     "runtimeExecutable": null,

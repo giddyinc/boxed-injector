@@ -30,9 +30,9 @@ export interface IRegisterable {
     options: IBaseOptions;
 }
 
-export interface IInstance extends IRegisterable {
+export interface IInstance<T = any> extends IRegisterable {
     name: string;
-    instance?: any;
+    instance?: T;
     depends: IDependencies;
     /**
      * Origin Factory
@@ -40,8 +40,8 @@ export interface IInstance extends IRegisterable {
     factory?: IInstanceConstructor | IInstanceCreatingFunction;
 }
 
-export interface IFactory extends IInstance, IRegisterable {
-    instance?: any;
+export interface IFactory<T = any> extends IInstance, IRegisterable {
+    instance?: T;
     depends: IDependencies;
 }
 

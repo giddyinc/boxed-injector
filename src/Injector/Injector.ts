@@ -202,7 +202,7 @@ export class Injector {
       dependents = [dependents];
     }
 
-    const constructorArgs = [ ...dependents, ...additionalArguments];
+    const constructorArgs = [...dependents, ...additionalArguments];
 
     if (isFunctionalFactory(entity)) {
       const { factory } = entity;
@@ -211,11 +211,11 @@ export class Injector {
 
     if (isConstructorFactory(entity)) {
       const { factory } = entity;
-      return new factory(...constructorArgs); 
+      return new factory(...constructorArgs);
     }
   }
 
-  public create(name: string, arg?, ...otherArgs) {
+  public create = (name: string, arg?, ...otherArgs) => {
     const {
       get,
       factories,
@@ -230,20 +230,19 @@ export class Injector {
     assert(factories[name] || (instances[name] && typeof instances[name].instance === 'function'), 'Factory or Service must be registered.');
 
     const deps = [...arg, ...otherArgs];
-
     if (factories[name]) {
       const entity = factories[name];
-      return self.inject(entity, {
-        additionalArguments: deps
-      });
+      const inst = this.get(name); // ensure all the static dependencies are there;
+      const factoryArgs = this._formatCachedResults(entity.depends);
+      let args;
+      if (Array.isArray(factoryArgs)) {
+        args = [...factoryArgs, ...deps];
+      } else {
+        args = [factoryArgs, ...deps];
+      }
 
-      // const Factory = entity.factory;
-      // const args: IDependency = entity.depends || [];
-
-      // // todo: handle map deps
-      // const resolvedDeps = args.map((dependency) => get(dependency));
-      // const merged = [].concat(resolvedDeps, deps);
-      // return new Factory(...merged);
+      const instance = this._constructFromCachedResults.apply(this, [entity, [...args]]);
+      return instance;
     }
 
     const Instance = instances[name].instance;
@@ -316,12 +315,20 @@ export class Injector {
     }, {});
   }
 
+  private _isFactory = (key: string): boolean => {
+    const { factories } = this;
+    if (factories[key]) {
+      return true;
+    }
+    return false;
+  }
+
   /**
    * Gets a named instance if found, or constructs a factory and returns it from the container.
    * Overloads allow arrays or maps to be returned.
    * @param name - Dependency
    */
-  public get(name: IDependencies): any {
+  public Oldget(name: IDependencies): any {
     const {
       _applyMiddleware,
       factories,
@@ -367,6 +374,168 @@ export class Injector {
     });
 
     return instanceEntity.instance;
+  }
+
+  private _getDependencyArray = (dependencies: IDependencies): string[] => {
+    let result;
+    if (Array.isArray(dependencies)) {
+      result = dependencies;
+    }
+    if (isString(dependencies)) {
+      result = [dependencies];
+    } else {
+      result = Object.values<string>(dependencies);
+    }
+    return result;
+  }
+
+  public get = (dependencies: IDependencies) => {
+    if (!dependencies) {
+      return null;
+    }
+    const {
+      instances,
+      factories
+    } = this;
+
+    // const instances = {
+    //   0:
+    //     {
+    //       name: '0',
+    //       instance: 'FOO',
+    //       depends: [],
+    //       options: {}
+    //     }
+    // };
+    // const factories = {
+    //   1: {
+    //     name: '1',
+    //     factory: class Cat { },
+    //     depends: ['0'],
+    //     options: {}
+    //   },
+    // };
+
+    const keys = this._getDependencyArray(dependencies);
+
+    const queue = [...keys];
+    
+    /** 
+     * Cache of instances.
+     */
+    const cache = instances;
+
+    // const currentNode = keys[0];
+    while (queue.length > 0) {
+      const currentNode = queue.shift();
+
+      // for object literal handling?
+      if (!isString(currentNode)) {
+        this.set(currentNode, currentNode);
+      }
+
+      // if it already is cached:
+      if (cache[currentNode]) {
+        continue;
+      }
+
+      if (!this.has(currentNode)) {
+        throw new Error(`${currentNode} is not yet registered! You either misspelled the name or forgot to register it.`);
+      }
+
+      if (!this._isFactory(currentNode)) {
+          const instance = this.instances[currentNode].instance;
+          continue;
+      }
+      
+      // its a factory
+
+
+      const registeredFactory = this.factories[currentNode];
+      const factoryDependencies = this._getDependencyArray(registeredFactory.depends);
+
+      // if its not cached
+      let depsNeedResolution = false;
+      // queue up its unresolved dependencies
+      for (const dep of factoryDependencies) {
+        if (!cache[dep]) {
+          if (!depsNeedResolution) {
+            queue.unshift(currentNode);
+          }
+          depsNeedResolution = true;
+          queue.unshift(dep);
+        }
+      }
+
+      // sort out deps first, go back to queue
+      if (depsNeedResolution) {
+        continue;
+      }
+
+      const factoryArgs = this._formatCachedResults(registeredFactory.depends);
+      const instance = this._constructFromCachedResults(registeredFactory, factoryArgs);
+
+      cache[currentNode] =  {
+        ...factories[currentNode],
+        instance
+      };
+      // instances[name] =
+
+      // return null;
+      // if its a factory, for each dependency, 
+      // check if its in the cache, 
+      // if all dependencies are cached, instantiate a new instance
+      // set it to the index of the results
+      // if its not in the cache, 
+      // push it into the queue
+      // and then set current node to bottom of queue
+    }
+    
+    this._runMiddleware(keys);
+    return this._formatCachedResults(dependencies);
+  }
+
+  private _runMiddleware = (keys: string[]) => {
+    const { _applyMiddleware, instances, factories } = this;
+    for (const key of keys) {
+      const entity = this._isFactory(key) ? factories[key] : instances[key];
+      this._applyMiddleware(entity, LifeCycle.BEFORE);
+      setTimeout(() => {
+        _applyMiddleware(entity, LifeCycle.AFTER); // run after middleware on all instances
+      });
+    }
+  }
+
+  private _constructFromCachedResults<T = any>(factory: IFactory, results): IInstance<T> {
+    if (isFunctionalFactory(factory)) {
+      const { factory: Factory } = factory;
+      if (Array.isArray(results)) {
+        return Factory(...results);
+      }
+      return Factory(results);        
+    } else if (isConstructorFactory(factory)) {
+      const { factory: Factory } = factory;
+      if (Array.isArray(results)) {
+        return new Factory(...results);
+      }
+      return new Factory(results);
+    }
+  }
+
+  private _formatCachedResults = (dependencies: IDependencies) => {
+    const { instances } = this;
+    if (Array.isArray(dependencies)) {
+      return dependencies.map((x: string) => instances[x].instance);
+    }
+
+    if (isString(dependencies)) {
+      return instances[dependencies].instance;
+    }
+
+    return Object.entries(dependencies).reduce((result, [key, name]) => {
+      result[key] = instances[name].instance;
+      return result;
+    }, {});
   }
 
   private _registerGlobalMiddleware(middleware: IMiddlewareFunc): this {
