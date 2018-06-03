@@ -1,18 +1,30 @@
 'use strict';
-import chalk from 'chalk';
+
 import assert from 'assert';
 import autoBind from 'auto-bind';
-import { isString, isObject } from 'util';
-import { IInstance, IFactory, IMiddlewares, IEntityMiddleware, IMapDependency, IMiddlewareFunc, IBaseOptions, IDependencies, IFunctionalFactory, IInstanceConstructor, IConstructorFactory } from './interfaces';
 import { LifeCycle } from './enums';
+import { IBaseOptions, IConstructorFactory, IDependencies, IEntityMiddleware, IFactory, IFunctionalFactory, IInstance, IMiddlewareFunc, IMiddlewares } from './interfaces';
+
+export interface InjectorOptions {
+  cyclicDependencyThreshhold?: number;
+  middlewareEnabled?: boolean;
+}
 
 export class Injector {
   private instances: { [key: string]: IInstance };
   private factories: { [key: string]: IFactory };
   private readonly globalStr: string;
   private middlewares: IMiddlewares;
+  private cyclicDependencyThreshhold: number;
+  private middlewareEnabled: boolean;
 
-  constructor() {
+  constructor(options: InjectorOptions = {}) {
+    const {
+      cyclicDependencyThreshhold = 2000,
+      middlewareEnabled = true
+    } = options;
+    this.cyclicDependencyThreshhold = cyclicDependencyThreshhold;
+    this.middlewareEnabled = middlewareEnabled;
     this.instances = {};
     this.factories = {};
     this.globalStr = '__global__';
@@ -27,7 +39,7 @@ export class Injector {
     autoBind(this);
   }
 
-  private _applyMiddleware(entity, lifecycle: LifeCycle) {
+  private _applyMiddleware(entity, lifecycle: LifeCycle): void {
     const {
       globalStr,
       middlewares
@@ -68,7 +80,6 @@ export class Injector {
   private _initMiddleware(name: string) {
     const {
       globalStr,
-      middleware,
       middlewares
     } = this;
 
@@ -181,47 +192,11 @@ export class Injector {
     return this;
   }
 
-  private inject(entity: IFactory, options: { additionalArguments?: any[] } = {}): IInstance {
-    const self = this;
-    const {
-      get
-    } = this;
-
-    const {
-      additionalArguments = []
-    } = options;
-
-    const {
-      factory,
-      depends: args = []
-    } = entity;
-
-    let dependents: any = get(args);
-
-    if (!Array.isArray(dependents)) {
-      dependents = [dependents];
-    }
-
-    const constructorArgs = [...dependents, ...additionalArguments];
-
-    if (isFunctionalFactory(entity)) {
-      const { factory } = entity;
-      return factory(...constructorArgs);
-    }
-
-    if (isConstructorFactory(entity)) {
-      const { factory } = entity;
-      return new factory(...constructorArgs);
-    }
-  }
-
   public create = (name: string, arg?, ...otherArgs) => {
     const {
-      get,
       factories,
       instances
     } = this;
-    const self = this;
 
     if (!Array.isArray(arg)) {
       arg = [arg];
@@ -232,7 +207,7 @@ export class Injector {
     const deps = [...arg, ...otherArgs];
     if (factories[name]) {
       const entity = factories[name];
-      const inst = this.get(name); // ensure all the static dependencies are there;
+      this.get(name); // ensure all the static dependencies are there;
       const factoryArgs = this._formatCachedResults(entity.depends);
       let args;
       if (Array.isArray(factoryArgs)) {
@@ -299,22 +274,6 @@ export class Injector {
     return graph;
   }
 
-  private _getArrayOfDependencies(deps: string[]): any[] {
-    return deps.map((name: string) => this.get(name));
-  }
-
-  private _getMapOfDependencies(deps: IMapDependency = {}): { [key: string]: any } {
-    const self = this;
-    return Object.entries(deps).reduce((result, [key, name]) => {
-      if (isString(name)) {
-        result[key] = self.get(name);
-        return result;
-      }
-      result[key] = name;
-      return result;
-    }, {});
-  }
-
   private _isFactory = (key: string): boolean => {
     const { factories } = this;
     if (factories[key]) {
@@ -323,58 +282,6 @@ export class Injector {
     return false;
   }
 
-  /**
-   * Gets a named instance if found, or constructs a factory and returns it from the container.
-   * Overloads allow arrays or maps to be returned.
-   * @param name - Dependency
-   */
-  public Oldget(name: IDependencies): any {
-    const {
-      _applyMiddleware,
-      factories,
-      inject,
-      instances
-    } = this;
-
-    if (Array.isArray(name)) {
-      return this._getArrayOfDependencies(name);
-    }
-
-    if (isObjectDependency(name)) {
-      return this._getMapOfDependencies(name);
-    }
-
-    let isFactory: boolean = false;
-
-    if (factories[name]) {
-      isFactory = true;
-    }
-
-    if (!instances[name]) {
-      assert(factories[name], `${name} is not yet registered! You either misspelled the name or forgot to register it.`);
-      const { factory } = factories[name];
-      if (typeof factory !== 'function') {
-        throw new TypeError(`${name} is not a constructor. Try declaring as an instance instead of a factory.`);
-      }
-      const entity = factories[name];
-      _applyMiddleware(entity, LifeCycle.BEFORE); // run before middleware on factory - only runs once
-      instances[name] = {
-        ...factories[name],
-        instance: inject(entity)
-      };
-    }
-
-    const instanceEntity = instances[name];
-    if (!isFactory) {
-      _applyMiddleware(instanceEntity, LifeCycle.BEFORE); // run before middleware on instance
-    }
-
-    setTimeout(() => {
-      _applyMiddleware(instanceEntity, LifeCycle.AFTER); // run after middleware on all instances
-    });
-
-    return instanceEntity.instance;
-  }
 
   private _getDependencyArray = (dependencies: IDependencies): string[] => {
     let result;
@@ -389,6 +296,11 @@ export class Injector {
     return result;
   }
 
+  /**
+   * Gets a named instance if found, or constructs a factory and returns it from the container.
+   * Overloads allow arrays or maps to be returned.
+   * @param name - Dependency
+   */
   public get = (dependencies: IDependencies) => {
     if (!dependencies) {
       return null;
@@ -398,36 +310,35 @@ export class Injector {
       factories
     } = this;
 
-    // const instances = {
-    //   0:
-    //     {
-    //       name: '0',
-    //       instance: 'FOO',
-    //       depends: [],
-    //       options: {}
-    //     }
-    // };
-    // const factories = {
-    //   1: {
-    //     name: '1',
-    //     factory: class Cat { },
-    //     depends: ['0'],
-    //     options: {}
-    //   },
-    // };
-
     const keys = this._getDependencyArray(dependencies);
 
     const queue = [...keys];
-    
+
     /** 
      * Cache of instances.
      */
     const cache = instances;
 
+    let i = 0;
+
     // const currentNode = keys[0];
+    const queueMap = queue.reduce((a, b) => {
+      a[b] = true; 
+      return a;
+    }, {});
+
     while (queue.length > 0) {
+      i++;
+
       const currentNode = queue.shift();
+      delete queueMap[currentNode];
+
+      if (i === this.cyclicDependencyThreshhold) {
+        // const index = queue.indexOf(currentNode);
+        const amtToLog = Math.min(queue.length, 10);
+        const elements = queue.slice(0, amtToLog);
+        throw new Error(`Circular dependency Detected when resolving "${currentNode}"! Check Dependencies: "${elements.join('", "')}"`);
+      }
 
       // for object literal handling?
       if (!isString(currentNode)) {
@@ -443,11 +354,6 @@ export class Injector {
         throw new Error(`${currentNode} is not yet registered! You either misspelled the name or forgot to register it.`);
       }
 
-      if (!this._isFactory(currentNode)) {
-          const instance = this.instances[currentNode].instance;
-          continue;
-      }
-      
       // its a factory
 
 
@@ -458,12 +364,21 @@ export class Injector {
       let depsNeedResolution = false;
       // queue up its unresolved dependencies
       for (const dep of factoryDependencies) {
+
+        if (dep === currentNode) {
+          throw new Error(`${currentNode} cannot have a dependency on itself! Dependency: ${dep}`);
+        }
+
         if (!cache[dep]) {
           if (!depsNeedResolution) {
+            queueMap[currentNode] = true;
             queue.unshift(currentNode);
           }
           depsNeedResolution = true;
-          queue.unshift(dep);
+          if (!queueMap[dep]) {
+            queueMap[dep] = true;
+            queue.unshift(dep);
+          }
         }
       }
 
@@ -475,23 +390,15 @@ export class Injector {
       const factoryArgs = this._formatCachedResults(registeredFactory.depends);
       const instance = this._constructFromCachedResults(registeredFactory, factoryArgs);
 
-      cache[currentNode] =  {
+      cache[currentNode] = {
         ...factories[currentNode],
         instance
       };
-      // instances[name] =
-
-      // return null;
-      // if its a factory, for each dependency, 
-      // check if its in the cache, 
-      // if all dependencies are cached, instantiate a new instance
-      // set it to the index of the results
-      // if its not in the cache, 
-      // push it into the queue
-      // and then set current node to bottom of queue
     }
-    
-    this._runMiddleware(keys);
+
+    if (this.middlewareEnabled) {
+      this._runMiddleware(keys);
+    }
     return this._formatCachedResults(dependencies);
   }
 
@@ -512,7 +419,7 @@ export class Injector {
       if (Array.isArray(results)) {
         return Factory(...results);
       }
-      return Factory(results);        
+      return Factory(results);
     } else if (isConstructorFactory(factory)) {
       const { factory: Factory } = factory;
       if (Array.isArray(results)) {
@@ -581,7 +488,6 @@ export class Injector {
       _initMiddleware,
       factories,
       instances,
-      globalStr,
       middlewares
     } = this;
 
@@ -619,14 +525,6 @@ export class Injector {
 
 }
 
-function isObjectDependency(e: any): e is IMapDependency {
-  return !Array.isArray(e) && !isString(e) && isObject(e);
-}
-
-function isEntityMiddleware(mw: any): mw is IEntityMiddleware {
-  return Array.isArray(mw) === false;
-}
-
 function isFunctionalFactory(factory: any): factory is IFunctionalFactory {
   const { options = {} } = factory;
   return options.function === true;
@@ -635,4 +533,8 @@ function isFunctionalFactory(factory: any): factory is IFunctionalFactory {
 function isConstructorFactory(factory: any): factory is IConstructorFactory {
   const { options = {} } = factory;
   return !options.function;
+}
+
+function isString(object: any): object is string {
+  return typeof object === 'string';
 }

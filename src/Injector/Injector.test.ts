@@ -33,6 +33,43 @@ describe('Injector', () => {
   afterEach(() => {
     sandbox.restore();
   });
+  describe('breakers', () => {
+    it('self-referencing detection', () => {
+      function Foo(foo) {
+        this.foo = foo;
+      }
+      (Foo as any).inject = [
+        'Foo'
+      ];
+  
+      injector.factory('Foo', Foo);
+      expect(() => injector.get('Foo')).toThrow();
+    });
+    it('circular dependency detection', () => {
+      // tslint:disable-next-line:no-empty
+      function Foo() {}
+      (Foo as any).inject = [
+        'Bar'
+      ];
+      // tslint:disable-next-line:no-empty
+      function Bar() {}
+      (Bar as any).inject = [
+        'Baz'
+      ];
+      // tslint:disable-next-line:no-empty
+      function Baz() {}
+      (Baz as any).inject = [
+        'Foo'
+      ];
+      
+      injector.factory('Foo', Foo);
+      injector.factory('Bar', Bar);
+      injector.factory('Baz', Baz);
+      // injector.get('Foo');
+      expect(() => injector.get('Foo')).toThrow();
+    });
+  });
+
   describe('general', () => {
     it('should be a constructor', () => {
       expect(typeof injector).toEqual('object', 'was expecting an object.');

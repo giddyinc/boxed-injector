@@ -12,7 +12,8 @@
         "allowSyntheticDefaultImports": true,
         "pretty": true,
         "listEmittedFiles": false,
-        "removeComments": true
+        "removeComments": true,
+        "noUnusedLocals": true
     },
     "include": [
         "src"
