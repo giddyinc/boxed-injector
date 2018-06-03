@@ -1,12 +1,14 @@
 
 import { Injector } from '../src';
-const injector = new Injector();
-
+import expect from 'expect';
 // const n = 700;
 const depsPerFactory = 3;
 const numberOfFactories = 2000;
+const injector = new Injector({
+    // cyclicDependencyThreshhold: numberOfFactories + 1
+});
 
-// nodemon --require ts-node/register test/perf
+// mocha --require ts-node/register test/perf.ts
 
 const classFactory = (dep: number) => {
     class Thing {
@@ -27,8 +29,6 @@ const classFactory = (dep: number) => {
     // console.log(`Dep: ${dep} nested dependencies: `, Thing.inject);
     return Thing;
 };
-
-
 
 // register first one as heuristic
 injector.register('0', 'FOO');
@@ -64,4 +64,14 @@ const final = (numberOfFactories - 1).toString();
 
     console.timeEnd('Huge Array');
 })();
+
+describe('', () => {
+    it('should work', function() {
+        this.timeout(10000);
+        const result = injector.get((numberOfFactories - 1).toString());
+        // console.log(result);
+        expect(result['0']['0']['0']['0']['0']['0']['0']['0']).toExist();
+    });
+});
+
 // nodemon --require ts-node/register test/perf.ts

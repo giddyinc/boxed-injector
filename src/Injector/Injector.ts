@@ -20,7 +20,7 @@ export class Injector {
 
   constructor(options: InjectorOptions = {}) {
     const {
-      cyclicDependencyThreshhold = 2000,
+      cyclicDependencyThreshhold = 5000,
       middlewareEnabled = true
     } = options;
     this.cyclicDependencyThreshhold = cyclicDependencyThreshhold;
@@ -321,20 +321,22 @@ export class Injector {
 
     let i = 0;
 
-    // const currentNode = keys[0];
     const queueMap = queue.reduce((a, b) => {
       a[b] = true; 
       return a;
     }, {});
 
     while (queue.length > 0) {
+      // console.log('='.repeat(100));
+      // console.log('@get queue', queue.length, i);
       i++;
 
       const currentNode = queue.shift();
       delete queueMap[currentNode];
 
-      if (i === this.cyclicDependencyThreshhold) {
+      if (i >= this.cyclicDependencyThreshhold) {
         // const index = queue.indexOf(currentNode);
+        // const amtToLog = Math.min(queue.length, index);
         const amtToLog = Math.min(queue.length, 10);
         const elements = queue.slice(0, amtToLog);
         throw new Error(`Circular dependency Detected when resolving "${currentNode}"! Check Dependencies: "${elements.join('", "')}"`);
@@ -368,17 +370,18 @@ export class Injector {
         if (dep === currentNode) {
           throw new Error(`${currentNode} cannot have a dependency on itself! Dependency: ${dep}`);
         }
-
+        // if dependency is a factory, it needs to be resolved first
         if (!cache[dep]) {
           if (!depsNeedResolution) {
             queueMap[currentNode] = true;
             queue.unshift(currentNode);
+            depsNeedResolution = true;
           }
-          depsNeedResolution = true;
-          if (!queueMap[dep]) {
-            queueMap[dep] = true;
-            queue.unshift(dep);
-          }
+          // the dependency of the current node, could also be being requested
+          // and as such, already in the queue which would make current node continuously requeue (circular).
+          // if we were to stick it to the end of the queue, it would grow the queue to be huge - so, since it'll skip over this anyway, just queue it.
+          queueMap[dep] = true;
+          queue.unshift(dep);
         }
       }
 
@@ -394,6 +397,7 @@ export class Injector {
         ...factories[currentNode],
         instance
       };
+      i--;
     }
 
     if (this.middlewareEnabled) {

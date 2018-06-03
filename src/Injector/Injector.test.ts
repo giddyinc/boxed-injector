@@ -34,6 +34,7 @@ describe('Injector', () => {
     sandbox.restore();
   });
   describe('breakers', () => {
+
     it('self-referencing detection', () => {
       function Foo(foo) {
         this.foo = foo;
@@ -45,6 +46,7 @@ describe('Injector', () => {
       injector.factory('Foo', Foo);
       expect(() => injector.get('Foo')).toThrow();
     });
+
     it('circular dependency detection', () => {
       // tslint:disable-next-line:no-empty
       function Foo() {}
