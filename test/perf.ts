@@ -41,15 +41,6 @@ for (let i = 1; i < numberOfFactories; i++) {
 const final = (numberOfFactories - 1).toString();
 
 (() => {
-    console.time('Startup');
-    // const pkg = injector.get(final);
-    // console.log(pkg);
-    // console.log(JSON.stringify(pkg, null, 2));
-    console.timeEnd('Startup');
-})();
-// nodemon --require ts-node/register test/perf.ts
-
-(() => {
     console.time('Huge Array');
     const all = new Array(numberOfFactories)
         .fill('')
@@ -60,7 +51,7 @@ const final = (numberOfFactories - 1).toString();
     const allPackages = injector.get(all);
     // console.log(pkg);
     // console.log(JSON.stringify(pkg, null, 2));
-    console.log(allPackages[numberOfFactories - 1]);
+    // console.log(allPackages[numberOfFactories - 1]);
 
     console.timeEnd('Huge Array');
 })();
