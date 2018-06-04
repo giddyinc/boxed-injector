@@ -18,6 +18,7 @@
     "no-consecutive-blank-lines": false,
     "only-arrow-functions": false,
     "max-line-length": false,
-    "no-empty": false
+    "no-empty": false,
+    "ban-types": false
   }
 }
