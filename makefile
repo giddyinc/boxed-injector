@@ -17,6 +17,3 @@ watch:
 
 lint:
 	npm run lint
-
-noemit:
-	tsc -p ./tsconfig.test.json

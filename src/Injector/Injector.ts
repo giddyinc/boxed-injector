@@ -1,18 +1,30 @@
 'use strict';
-import chalk from 'chalk';
+
 import assert from 'assert';
 import autoBind from 'auto-bind';
-import { isString, isObject } from 'util';
-import { IInstance, IFactory, IMiddlewares, IEntityMiddleware, IMapDependency, IMiddlewareFunc, IBaseOptions, IDependencies, IFunctionalFactory, IInstanceConstructor, IConstructorFactory } from './interfaces';
 import { LifeCycle } from './enums';
+import { IBaseOptions, IConstructorFactory, IDependencies, IEntityMiddleware, IFactory, IFunctionalFactory, IInstance, IMiddlewareFunc, IMiddlewares } from './interfaces';
+
+export interface InjectorOptions {
+  cyclicDependencyThreshhold?: number;
+  middlewareEnabled?: boolean;
+}
 
 export class Injector {
   private instances: { [key: string]: IInstance };
   private factories: { [key: string]: IFactory };
   private readonly globalStr: string;
   private middlewares: IMiddlewares;
+  private cyclicDependencyThreshhold: number;
+  private middlewareEnabled: boolean;
 
-  constructor() {
+  constructor(options: InjectorOptions = {}) {
+    const {
+      cyclicDependencyThreshhold = 5000,
+      middlewareEnabled = true
+    } = options;
+    this.cyclicDependencyThreshhold = cyclicDependencyThreshhold;
+    this.middlewareEnabled = middlewareEnabled;
     this.instances = {};
     this.factories = {};
     this.globalStr = '__global__';
@@ -27,7 +39,7 @@ export class Injector {
     autoBind(this);
   }
 
-  private _applyMiddleware(entity, lifecycle: LifeCycle) {
+  private _applyMiddleware(entity, lifecycle: LifeCycle): void {
     const {
       globalStr,
       middlewares
@@ -68,7 +80,6 @@ export class Injector {
   private _initMiddleware(name: string) {
     const {
       globalStr,
-      middleware,
       middlewares
     } = this;
 
@@ -181,47 +192,11 @@ export class Injector {
     return this;
   }
 
-  private inject(entity: IFactory, options: { additionalArguments?: any[] } = {}): IInstance {
-    const self = this;
+  public create = (name: string, arg?, ...otherArgs) => {
     const {
-      get
-    } = this;
-
-    const {
-      additionalArguments = []
-    } = options;
-
-    const {
-      factory,
-      depends: args = []
-    } = entity;
-
-    let dependents: any = get(args);
-
-    if (!Array.isArray(dependents)) {
-      dependents = [dependents];
-    }
-
-    const constructorArgs = [ ...dependents, ...additionalArguments];
-
-    if (isFunctionalFactory(entity)) {
-      const { factory } = entity;
-      return factory(...constructorArgs);
-    }
-
-    if (isConstructorFactory(entity)) {
-      const { factory } = entity;
-      return new factory(...constructorArgs); 
-    }
-  }
-
-  public create(name: string, arg?, ...otherArgs) {
-    const {
-      get,
       factories,
       instances
     } = this;
-    const self = this;
 
     if (!Array.isArray(arg)) {
       arg = [arg];
@@ -230,20 +205,19 @@ export class Injector {
     assert(factories[name] || (instances[name] && typeof instances[name].instance === 'function'), 'Factory or Service must be registered.');
 
     const deps = [...arg, ...otherArgs];
-
     if (factories[name]) {
       const entity = factories[name];
-      return self.inject(entity, {
-        additionalArguments: deps
-      });
+      this.get(name); // ensure all the static dependencies are there;
+      const factoryArgs = this._formatCachedResults(entity.depends);
+      let args;
+      if (Array.isArray(factoryArgs)) {
+        args = [...factoryArgs, ...deps];
+      } else {
+        args = [factoryArgs, ...deps];
+      }
 
-      // const Factory = entity.factory;
-      // const args: IDependency = entity.depends || [];
-
-      // // todo: handle map deps
-      // const resolvedDeps = args.map((dependency) => get(dependency));
-      // const merged = [].concat(resolvedDeps, deps);
-      // return new Factory(...merged);
+      const instance = this._constructFromCachedResults.apply(this, [entity, [...args]]);
+      return instance;
     }
 
     const Instance = instances[name].instance;
@@ -300,20 +274,26 @@ export class Injector {
     return graph;
   }
 
-  private _getArrayOfDependencies(deps: string[]): any[] {
-    return deps.map((name: string) => this.get(name));
+  private _isFactory = (key: string): boolean => {
+    const { factories } = this;
+    if (factories[key]) {
+      return true;
+    }
+    return false;
   }
 
-  private _getMapOfDependencies(deps: IMapDependency = {}): { [key: string]: any } {
-    const self = this;
-    return Object.entries(deps).reduce((result, [key, name]) => {
-      if (isString(name)) {
-        result[key] = self.get(name);
-        return result;
-      }
-      result[key] = name;
-      return result;
-    }, {});
+
+  private _getDependencyArray = (dependencies: IDependencies): string[] => {
+    let result;
+    if (Array.isArray(dependencies)) {
+      result = dependencies;
+    }
+    if (isString(dependencies)) {
+      result = [dependencies];
+    } else {
+      result = Object.values<string>(dependencies);
+    }
+    return result;
   }
 
   /**
@@ -321,52 +301,152 @@ export class Injector {
    * Overloads allow arrays or maps to be returned.
    * @param name - Dependency
    */
-  public get(name: IDependencies): any {
+  public get = (dependencies: IDependencies) => {
+    if (!dependencies) {
+      return null;
+    }
     const {
-      _applyMiddleware,
-      factories,
-      inject,
-      instances
+      instances,
+      factories
     } = this;
 
-    if (Array.isArray(name)) {
-      return this._getArrayOfDependencies(name);
-    }
+    const keys = this._getDependencyArray(dependencies);
 
-    if (isObjectDependency(name)) {
-      return this._getMapOfDependencies(name);
-    }
+    const queue = [...keys];
 
-    let isFactory: boolean = false;
+    /** 
+     * Cache of instances.
+     */
+    const cache = instances;
 
-    if (factories[name]) {
-      isFactory = true;
-    }
+    let i = 0;
 
-    if (!instances[name]) {
-      assert(factories[name], `${name} is not yet registered! You either misspelled the name or forgot to register it.`);
-      const { factory } = factories[name];
-      if (typeof factory !== 'function') {
-        throw new TypeError(`${name} is not a constructor. Try declaring as an instance instead of a factory.`);
+    const queueMap = queue.reduce((a, b) => {
+      a[b] = true; 
+      return a;
+    }, {});
+
+    while (queue.length > 0) {
+      // console.log('='.repeat(100));
+      // console.log('@get queue', queue.length, i);
+      i++;
+
+      const currentNode = queue.shift();
+      delete queueMap[currentNode];
+
+      if (i >= this.cyclicDependencyThreshhold) {
+        // const index = queue.indexOf(currentNode);
+        // const amtToLog = Math.min(queue.length, index);
+        const amtToLog = Math.min(queue.length, 10);
+        const elements = queue.slice(0, amtToLog);
+        throw new Error(`Circular dependency Detected when resolving "${currentNode}"! Check Dependencies: "${elements.join('", "')}"`);
       }
-      const entity = factories[name];
-      _applyMiddleware(entity, LifeCycle.BEFORE); // run before middleware on factory - only runs once
-      instances[name] = {
-        ...factories[name],
-        instance: inject(entity)
+
+      // for object literal handling?
+      if (!isString(currentNode)) {
+        this.set(currentNode, currentNode);
+      }
+
+      // if it already is cached:
+      if (cache[currentNode]) {
+        continue;
+      }
+
+      if (!this.has(currentNode)) {
+        throw new Error(`${currentNode} is not yet registered! You either misspelled the name or forgot to register it.`);
+      }
+
+      // its a factory
+
+
+      const registeredFactory = this.factories[currentNode];
+      const factoryDependencies = this._getDependencyArray(registeredFactory.depends);
+
+      // if its not cached
+      let depsNeedResolution = false;
+      // queue up its unresolved dependencies
+      for (const dep of factoryDependencies) {
+
+        if (dep === currentNode) {
+          throw new Error(`${currentNode} cannot have a dependency on itself! Dependency: ${dep}`);
+        }
+        // if dependency is a factory, it needs to be resolved first
+        if (!cache[dep]) {
+          if (!depsNeedResolution) {
+            queueMap[currentNode] = true;
+            queue.unshift(currentNode);
+            depsNeedResolution = true;
+          }
+          // the dependency of the current node, could also be being requested
+          // and as such, already in the queue which would make current node continuously requeue (circular).
+          // if we were to stick it to the end of the queue, it would grow the queue to be huge - so, since it'll skip over this anyway, just queue it.
+          queueMap[dep] = true;
+          queue.unshift(dep);
+        }
+      }
+
+      // sort out deps first, go back to queue
+      if (depsNeedResolution) {
+        continue;
+      }
+
+      const factoryArgs = this._formatCachedResults(registeredFactory.depends);
+      const instance = this._constructFromCachedResults(registeredFactory, factoryArgs);
+
+      cache[currentNode] = {
+        ...factories[currentNode],
+        instance
       };
+      i--;
     }
 
-    const instanceEntity = instances[name];
-    if (!isFactory) {
-      _applyMiddleware(instanceEntity, LifeCycle.BEFORE); // run before middleware on instance
+    if (this.middlewareEnabled) {
+      this._runMiddleware(keys);
+    }
+    return this._formatCachedResults(dependencies);
+  }
+
+  private _runMiddleware = (keys: string[]) => {
+    const { _applyMiddleware, instances, factories } = this;
+    for (const key of keys) {
+      const entity = this._isFactory(key) ? factories[key] : instances[key];
+      this._applyMiddleware(entity, LifeCycle.BEFORE);
+      setTimeout(() => {
+        _applyMiddleware(entity, LifeCycle.AFTER); // run after middleware on all instances
+      });
+    }
+  }
+
+  private _constructFromCachedResults<T = any>(factory: IFactory, results): IInstance<T> {
+    if (isFunctionalFactory(factory)) {
+      const { factory: Factory } = factory;
+      if (Array.isArray(results)) {
+        return Factory(...results);
+      }
+      return Factory(results);
+    } else if (isConstructorFactory(factory)) {
+      const { factory: Factory } = factory;
+      if (Array.isArray(results)) {
+        return new Factory(...results);
+      }
+      return new Factory(results);
+    }
+  }
+
+  private _formatCachedResults = (dependencies: IDependencies) => {
+    const { instances } = this;
+    if (Array.isArray(dependencies)) {
+      return dependencies.map((x: string) => instances[x].instance);
     }
 
-    setTimeout(() => {
-      _applyMiddleware(instanceEntity, LifeCycle.AFTER); // run after middleware on all instances
-    });
+    if (isString(dependencies)) {
+      return instances[dependencies].instance;
+    }
 
-    return instanceEntity.instance;
+    return Object.entries(dependencies).reduce((result, [key, name]) => {
+      result[key] = instances[name].instance;
+      return result;
+    }, {});
   }
 
   private _registerGlobalMiddleware(middleware: IMiddlewareFunc): this {
@@ -412,7 +492,6 @@ export class Injector {
       _initMiddleware,
       factories,
       instances,
-      globalStr,
       middlewares
     } = this;
 
@@ -450,14 +529,6 @@ export class Injector {
 
 }
 
-function isObjectDependency(e: any): e is IMapDependency {
-  return !Array.isArray(e) && !isString(e) && isObject(e);
-}
-
-function isEntityMiddleware(mw: any): mw is IEntityMiddleware {
-  return Array.isArray(mw) === false;
-}
-
 function isFunctionalFactory(factory: any): factory is IFunctionalFactory {
   const { options = {} } = factory;
   return options.function === true;
@@ -466,4 +537,8 @@ function isFunctionalFactory(factory: any): factory is IFunctionalFactory {
 function isConstructorFactory(factory: any): factory is IConstructorFactory {
   const { options = {} } = factory;
   return !options.function;
+}
+
+function isString(object: any): object is string {
+  return typeof object === 'string';
 }

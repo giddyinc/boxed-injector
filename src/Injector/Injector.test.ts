@@ -33,6 +33,45 @@ describe('Injector', () => {
   afterEach(() => {
     sandbox.restore();
   });
+  describe('breakers', () => {
+
+    it('self-referencing detection', () => {
+      function Foo(foo) {
+        this.foo = foo;
+      }
+      (Foo as any).inject = [
+        'Foo'
+      ];
+  
+      injector.factory('Foo', Foo);
+      expect(() => injector.get('Foo')).toThrow();
+    });
+
+    it('circular dependency detection', () => {
+      // tslint:disable-next-line:no-empty
+      function Foo() {}
+      (Foo as any).inject = [
+        'Bar'
+      ];
+      // tslint:disable-next-line:no-empty
+      function Bar() {}
+      (Bar as any).inject = [
+        'Baz'
+      ];
+      // tslint:disable-next-line:no-empty
+      function Baz() {}
+      (Baz as any).inject = [
+        'Foo'
+      ];
+      
+      injector.factory('Foo', Foo);
+      injector.factory('Bar', Bar);
+      injector.factory('Baz', Baz);
+      // injector.get('Foo');
+      expect(() => injector.get('Foo')).toThrow();
+    });
+  });
+
   describe('general', () => {
     it('should be a constructor', () => {
       expect(typeof injector).toEqual('object', 'was expecting an object.');
@@ -243,7 +282,14 @@ describe('Injector', () => {
   });
 
   describe('get', () => {
+    it('basic', () => {
+      injector.register('0', 'foo');
+      const result = injector.get('0');
+      expect(result).toEqual('foo');
+    });
+
     it('array, string, and map api', () => {
+
       injector.register(types.COLOR_CONFIG, PREFERRED_COLOR);
       injector.register(types.VOLUME_CONFIG, PREFERRED_VOLUME);
       
@@ -387,13 +433,14 @@ describe('Injector', () => {
     });
     it('should create an instance of a factory withArgs', () => {
       const instance1 = injector.create('BMW', 'black');
-      const instance2 = injector.create('BMW', ['white', 'leather']);
       expect(instance1.make).toBe('BMW');
       expect(instance1.color).toBe('black');
-      expect(instance2.make).toBe('BMW');
-      expect(instance2.color).toBe('white');
       expect(instance1.engine).toBe('foo');
+
+      const instance2 = injector.create('BMW', ['white', 'leather']);
+      expect(instance2.make).toBe('BMW');
       expect(instance2.engine).toBe('foo');
+      expect(instance2.color).toBe('white');
       expect(instance2.interior).toBe('leather');
     });
 
@@ -417,12 +464,13 @@ describe('Injector', () => {
       injector.factory(type, Mercedes);
 
       const instance1 = injector.create(type, 'black');
-      const instance2 = injector.create(type, ['white', 'leather']);
       expect(instance1.make).toBe('CL500');
-      expect(instance1.engine).toBe('foo');
-      expect(instance2.engine).toBe('foo');
       expect(instance1.daFunk).toEqual(myObjectLiteral);
       expect(instance1.color).toBe('black');
+      expect(instance1.engine).toBe('foo');
+
+      const instance2 = injector.create(type, ['white', 'leather']);
+      expect(instance2.engine).toBe('foo');
       expect(instance2.make).toBe('CL500');
       expect(instance2.color).toBe('white');
       expect(instance2.interior).toBe('leather');
@@ -469,6 +517,45 @@ describe('Injector', () => {
       injector.factory(name, thing);
       expect(injector.has(name)).toEqual(true);
       expect(injector.has('bar')).toEqual(false);
+    });
+  });
+
+
+  describe('_getDependencyArray', () => {
+    it('object', () => {
+      const inj: any = injector;
+      const result = inj._getDependencyArray({
+        foo: 'foo',
+        bar: 'bar',
+        baz: 'baz'
+      });
+      expect(result).toEqual([
+        'foo',
+        'bar',
+        'baz'
+      ]);
+    });
+    it('arr', () => {
+      const inj: any = injector;
+      const result = inj._getDependencyArray([
+        'foo',
+        'bar',
+        'baz'
+      ]);
+      expect(result).toEqual([
+        'foo',
+        'bar',
+        'baz'
+      ]);
+    });
+    it('arr', () => {
+      const inj: any = injector;
+      const result = inj._getDependencyArray(
+        'foo',
+      );
+      expect(result).toEqual([
+        'foo',
+      ]);
     });
   });
 });
