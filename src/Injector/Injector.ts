@@ -1,4 +1,3 @@
-'use strict';
 
 import assert from 'assert';
 import { LifeCycle } from './enums';
@@ -189,6 +188,7 @@ export class Injector {
     let {
       depends = []
     } = options;
+
     assert(name, 'Invalid name. Instances must be registered with a valid unique string.');
 
     _ensureDistinct(name);
@@ -241,53 +241,41 @@ export class Injector {
     return new Instance(...deps);
   }
 
-  public graph(name, nested?: boolean) {
+  public graph(dependencies: IDependencies): string[] {
     const {
+      _getDependencyArray,
       factories,
       has,
       instances
     } = this;
 
-    const defaultObj = {
-      all: [],
-      hash: {}
-    };
-
-    if (!Array.isArray(name) && !has(name)) {
-      if (nested) {
-        return defaultObj;
-      }
+    if (isString(dependencies) && !has(dependencies)) {
       return [];
     }
 
-    const entityKeys = Array.isArray(name) ? name : [name];
-    const deps = entityKeys.reduce((children, key) => {
-      const entity = factories[key] ? factories[key] : instances[key];
-      return children.concat(entity.depends);
-    }, []);
+    const dependenciesArray = _getDependencyArray(dependencies);
 
-    const graph = deps.reduce((obj, elem) => {
-      const add = (e) => {
-        if (!obj.hash[e]) {
-          obj.all.push(e);
-          obj.hash[e] = true;
-        }
-      };
+    const graph: string[] = [];
+    const visited: any = {};
+    const queue: string[] = [...dependenciesArray];
 
-      add(elem);
-      const child = this.graph(elem, true);
-      child.all.forEach((childDep) => {
-        add(childDep);
+    while (queue.length > 0) {
+      const next = queue.shift();
+      const registration = factories[next] || instances[next] || { depends: [] };
+      const { depends } = registration;
+      const childDeps = _getDependencyArray(depends);
+
+      childDeps.forEach((d) => {
+          queue.push(d);
       });
 
-      return obj;
-    }, defaultObj);
-
-    if (!nested) {
-      return graph.all;
+      graph.unshift(next);
+      visited[next] = true;
     }
 
-    return graph;
+    return graph
+      .filter(uniq)
+      ;
   }
 
   private _isFactory = (key: string): boolean => {
@@ -429,7 +417,7 @@ export class Injector {
       this._applyMiddleware(entity, LifeCycle.BEFORE);
       setTimeout(() => {
         _applyMiddleware(entity, LifeCycle.AFTER); // run after middleware on all instances
-      });
+      }, 0);
     }
   }
 
@@ -557,4 +545,8 @@ function isConstructorFactory(factory: any): factory is IConstructorFactory {
 
 function isString(object: any): object is string {
   return typeof object === 'string';
+}
+
+function uniq(value: string, index: number, self) {
+  return self.indexOf(value) === index;
 }
