@@ -16,7 +16,6 @@ import {
 } from '../../test/entities';
 
 /**
- * to run standalone:
  * mocha src/Injector/Injector.test.ts --opts .mocharc --watch
  */
 
@@ -78,9 +77,9 @@ describe('Injector', () => {
     });
   });
   describe('register', () => {
-    it('should be able to register instances', () => {
+    it.only('should be able to register instances', () => {
       injector.register('foo', 'bar', { depends: 'bar' });
-      expect(injector.graph('foo')).toEqual(['bar']);
+      expect(injector.graph('foo')).toEqual(['bar', 'foo']);
     });
 
     it('should be able to register instances', () => {
@@ -244,6 +243,7 @@ describe('Injector', () => {
       const result = injector.graph('asdf');
       expect(result).toEqual([]);
     });
+
     it('should get a graph', () => {
       injector.register('asdf', 'asdf');
       injector.factory('a', () => 'a', { depends: [], function: true });
@@ -279,6 +279,8 @@ describe('Injector', () => {
       //   injector.graph('f')
       // );
     });
+
+
   });
 
   describe('get', () => {
@@ -368,9 +370,16 @@ describe('Injector', () => {
       // const boat = injector.get(types.Boat);
       // expect(boat.color).toEqual(PREFERRED_COLOR);
       // expect(boat.stereo).toEqual(stereo);
+      // console.log(injector.graph(types.Jetski));
+      // console.log(injector.graph(types.Boat));
+      // console.log(injector.graph(types.Motorcycle));
 
+      expect(injector.graph(types.Motorcycle)).toEqual(['VOLUME_CONFIG', 'COLOR_CONFIG', 'Bose', types.Motorcycle]);
     });
 
+    // it('graph', () => {
+
+    // });
 
 
     
