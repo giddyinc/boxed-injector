@@ -40,7 +40,5 @@
     "test": "NODE_ENV=test nyc mocha test/*.ts src/**/*.test.ts --opts .mocharc",
     "test:watch": "make watch"
   },
-  "dependencies": {
-    "auto-bind": "^1.2.0"
-  }
+  "dependencies": {}
 }

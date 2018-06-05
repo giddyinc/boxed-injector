@@ -1,7 +1,6 @@
 'use strict';
 
 import assert from 'assert';
-import autoBind from 'auto-bind';
 import { LifeCycle } from './enums';
 import { IBaseOptions, IConstructorFactory, IDependencies, IEntityMiddleware, IFactory, IFunctionalFactory, IInstance, IMiddlewareFunc, IMiddlewares } from './interfaces';
 
@@ -36,7 +35,24 @@ export class Injector {
       }
     };
 
-    autoBind(this);
+    this._applyMiddleware = this._applyMiddleware.bind(this);
+    this._constructFromCachedResults = this._constructFromCachedResults.bind(this);
+    this._ensureDistinct = this._ensureDistinct.bind(this);
+    this._formatCachedResults = this._formatCachedResults.bind(this);
+    this._getDependencyArray = this._getDependencyArray.bind(this);
+    this._initMiddleware = this._initMiddleware.bind(this);
+    this._isFactory = this._isFactory.bind(this);
+    this._registerGlobalMiddleware = this._registerGlobalMiddleware.bind(this);
+    this._runMiddleware = this._runMiddleware.bind(this);
+    this.create = this.create.bind(this);
+    this.factory = this.factory.bind(this);
+    this.get = this.get.bind(this);
+    this.graph = this.graph.bind(this);
+    this.has = this.has.bind(this);
+    this.middleware = this.middleware.bind(this);
+    this.register = this.register.bind(this);
+    this.set = this.set.bind(this);
+    this.unset = this.unset.bind(this);
   }
 
   private _applyMiddleware(entity, lifecycle: LifeCycle): void {
@@ -322,7 +338,7 @@ export class Injector {
     let i = 0;
 
     const queueMap = queue.reduce((a, b) => {
-      a[b] = true; 
+      a[b] = true;
       return a;
     }, {});
 
