@@ -19,7 +19,6 @@
     "only-arrow-functions": false,
     "max-line-length": false,
     "no-empty": false,
-    "ban-types": false,
-    "no-typeof-undefined": true
+    "ban-types": false  
   }
 }
