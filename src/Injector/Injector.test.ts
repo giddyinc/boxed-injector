@@ -1,7 +1,7 @@
 'use strict';
 
 import expect from 'expect';
-import sinon, { SinonSandbox, SinonStubbedInstance } from 'sinon';
+import sinon from 'sinon';
 import { Injector } from './Injector';
 import {
   Stereo,
@@ -16,14 +16,13 @@ import {
 } from '../../test/entities';
 
 /**
- * to run standalone:
  * mocha src/Injector/Injector.test.ts --opts .mocharc --watch
  */
 
 describe('Injector', () => {
   let injector: Injector;
-  let sandbox: SinonSandbox;
-  let logger: SinonStubbedInstance<Console>;
+  let sandbox;
+  let logger;
 
   beforeEach(() => {
     injector = new Injector();
@@ -80,7 +79,7 @@ describe('Injector', () => {
   describe('register', () => {
     it('should be able to register instances', () => {
       injector.register('foo', 'bar', { depends: 'bar' });
-      expect(injector.graph('foo')).toEqual(['bar']);
+      expect(injector.graph('foo')).toEqual(['bar', 'foo']);
     });
 
     it('should be able to register instances', () => {
@@ -244,6 +243,7 @@ describe('Injector', () => {
       const result = injector.graph('asdf');
       expect(result).toEqual([]);
     });
+
     it('should get a graph', () => {
       injector.register('asdf', 'asdf');
       injector.factory('a', () => 'a', { depends: [], function: true });
@@ -261,14 +261,22 @@ describe('Injector', () => {
         d, g
       }, function: true });
 
-      expect(injector.graph('a')).toEqual([]);
-      expect(injector.graph('asdf')).toEqual([]);
-      expect(injector.graph('b')).toEqual(['a']);
-      expect(injector.graph('c')).toEqual(['b', 'a']);
+      expect(injector.graph('a')).toEqual(['a']);
+      expect(injector.graph('asdf')).toEqual(['asdf']);
+      expect(injector.graph('b')).toEqual(['a', 'b']);
+      expect(injector.graph('c')).toEqual(['a', 'b', 'c']);
       const eResult = injector.graph('e');
       expect(Array.isArray(eResult)).toBe(true);
-      expect(eResult).toEqual(['d', 'c', 'b', 'a']);
-      expect(injector.graph(['e', 'f'])).toEqual(['d', 'c', 'b', 'a', 'g']);
+
+      //   e
+      // d   a
+      // c   
+      // b a
+      expect(eResult).toEqual(['a', 'b', 'c', 'd', 'e'], 'unable to resolve e');
+
+      
+      // console.log('Graph Result', injector.graph(['e', 'f']));
+      expect(injector.graph(['e', 'f'])).toEqual(['a', 'b', 'c', 'g', 'd', 'f', 'e'], 'e f');
 
       // console.log(injector.graph('f'));
       // console.log(injector.graph('j'));
@@ -279,6 +287,8 @@ describe('Injector', () => {
       //   injector.graph('f')
       // );
     });
+
+
   });
 
   describe('get', () => {
@@ -368,9 +378,17 @@ describe('Injector', () => {
       // const boat = injector.get(types.Boat);
       // expect(boat.color).toEqual(PREFERRED_COLOR);
       // expect(boat.stereo).toEqual(stereo);
+      // console.log(injector.graph(types.Jetski));
+      // console.log(injector.graph(types.Boat));
+      // console.log(injector.graph(types.Motorcycle));
+
+      expect(injector.graph(types.Motorcycle)).toEqual(['COLOR_CONFIG', 'VOLUME_CONFIG', 'Bose', types.Motorcycle]);
 
     });
 
+    // it('graph', () => {
+
+    // });
 
 
     
