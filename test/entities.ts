@@ -11,6 +11,8 @@ export const types = {
     Jetski: 'Jetski'
 };
 
+export const stereoTypeAsExport = 'Stereo';
+
 export const PREFERRED_COLOR = 'black';
 export const PREFERRED_VOLUME = 'loud';
 
