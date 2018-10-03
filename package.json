@@ -1,6 +1,6 @@
 {
   "name": "boxed-injector",
-  "version": "1.1.2",
+  "version": "2.0.0",
   "description": "Dependency Injection Tools",
   "author": {
     "name": "Ben Lugavere",
@@ -29,7 +29,8 @@
     "source-map-support": "^0.5.4",
     "ts-node": "^5.0.1",
     "tslint": "^5.10.0",
-    "typescript": "^2.7.2"
+    "typescript": "^2.7.2",
+    "snyk": "^1.91.0"
   },
   "license": "MIT",
   "repository": "giddyinc/boxed-injector",
@@ -37,7 +38,7 @@
     "clean": "rm -rf .nyc_output dist",
     "lint": "tslint --project .",
     "prepublish": "npm run lint && tsc",
-    "test": "NODE_ENV=test nyc mocha test/*.ts src/**/*.test.ts --opts .mocharc",
+    "test": "snyk test && NODE_ENV=test nyc mocha test/*.ts src/**/*.test.ts --opts .mocharc",
     "test:watch": "make watch"
   },
   "dependencies": {}

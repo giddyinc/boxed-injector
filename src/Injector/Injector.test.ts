@@ -13,6 +13,7 @@ import {
   PREFERRED_VOLUME,
   Motorcycle,
   Jetski,
+  stereoTypeAsExport,
 } from '../../test/entities';
 
 /**
@@ -299,6 +300,21 @@ describe('Injector', () => {
     });
 
     it('array, string, and map api', () => {
+      interface IStereo {
+        on: boolean;
+      }
+      const injector = new Injector<{
+        [key: string]: any;
+        Stereo: IStereo;
+      }>();
+
+      (() => {
+        const stereoType = 'Stereo';
+        const stereo = injector.get('Stereo');
+        const stereo2 = injector.get(types.Stereo);
+        const stereo3 = injector.get(stereoType);
+        const stereo4 = injector.get(stereoTypeAsExport);
+      });
 
       injector.register(types.COLOR_CONFIG, PREFERRED_COLOR);
       injector.register(types.VOLUME_CONFIG, PREFERRED_VOLUME);
@@ -437,7 +453,23 @@ describe('Injector', () => {
   });
 
   describe('create', () => {
+    interface ICar {
+      vroom: string;
+      make: string;
+      color: string;
+      engine: string;
+      interior: string;
+      daFunk: string;
+    }
+
+    let injector: Injector<{
+      BMW: ICar,
+      Mercedes: ICar,
+      Ferarri: ICar,
+    }>;
+
     beforeEach(() => {
+      injector = new Injector();
       function BMW(engine, color, interior) {
         this.make = 'BMW';
         this.engine = engine;

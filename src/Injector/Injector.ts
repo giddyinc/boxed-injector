@@ -8,9 +8,9 @@ export interface InjectorOptions {
   middlewareEnabled?: boolean;
 }
 
-export class Injector {
-  private instances: { [key: string]: IInstance };
-  private factories: { [key: string]: IFactory };
+export class Injector<T = { [key: string]: any }> {
+  private instances; // : { [key: string]: IInstance };
+  private factories; // { [key: string]: IFactory };
   private readonly globalStr: string;
   private middlewares: IMiddlewares;
   private cyclicDependencyThreshhold: number;
@@ -208,7 +208,7 @@ export class Injector {
     return this;
   }
 
-  public create = (name: string, arg?, ...otherArgs) => {
+  public create<K extends keyof T>(name: K, arg?, ...otherArgs): T[K] {
     const {
       factories,
       instances
@@ -305,7 +305,30 @@ export class Injector {
    * Overloads allow arrays or maps to be returned.
    * @param name - Dependency
    */
-  public get = (dependencies: IDependencies) => {
+  public get<K extends keyof T>(dependencies: K): T[K];
+  public get<K1 extends keyof T>(dependencies: [K1]): [T[K1]];
+  public get<K1 extends keyof T, K2 extends keyof T>(dependencies: [K1, K2]): [T[K1], T[K2]];
+  public get<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T>(dependencies: [K1, K2, K3]): [T[K1], T[K2], T[K3]];
+  public get<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T>(dependencies: [K1, K2, K3, K4]): [T[K1], T[K2], T[K3], T[K4]];
+  public get<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T>(dependencies: [K1, K2, K3, K4, K5]): [T[K1], T[K2], T[K3], T[K4], T[K5]];
+  public get<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6]];
+  public get<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7]];
+  public get<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8]];
+  public get<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9]];
+  public get<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10]];
+  public get<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11]];
+  public get<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T, K12 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11], T[K12]];
+  public get<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T, K12 extends keyof T, K13 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11], T[K12], T[K13]];
+  public get<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T, K12 extends keyof T, K13 extends keyof T, K14 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11], T[K12], T[K13], T[K14]];
+  public get<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T, K12 extends keyof T, K13 extends keyof T, K14 extends keyof T, K15 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11], T[K12], T[K13], T[K14], T[K15]];
+  public get<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T, K12 extends keyof T, K13 extends keyof T, K14 extends keyof T, K15 extends keyof T, K16 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15, K16]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11], T[K12], T[K13], T[K14], T[K15], T[K16]];
+  public get<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T, K12 extends keyof T, K13 extends keyof T, K14 extends keyof T, K15 extends keyof T, K16 extends keyof T, K17 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15, K16, K17]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11], T[K12], T[K13], T[K14], T[K15], T[K16], T[K17]];
+  public get<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T, K12 extends keyof T, K13 extends keyof T, K14 extends keyof T, K15 extends keyof T, K16 extends keyof T, K17 extends keyof T, K18 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15, K16, K17, K18]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11], T[K12], T[K13], T[K14], T[K15], T[K16], T[K17], T[K18]];
+  public get<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T, K12 extends keyof T, K13 extends keyof T, K14 extends keyof T, K15 extends keyof T, K16 extends keyof T, K17 extends keyof T, K18 extends keyof T, K19 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15, K16, K17, K18, K19]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11], T[K12], T[K13], T[K14], T[K15], T[K16], T[K17], T[K18], T[K19]];
+  public get<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T, K12 extends keyof T, K13 extends keyof T, K14 extends keyof T, K15 extends keyof T, K16 extends keyof T, K17 extends keyof T, K18 extends keyof T, K19 extends keyof T, K20 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15, K16, K17, K18, K19, K20]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11], T[K12], T[K13], T[K14], T[K15], T[K16], T[K17], T[K18], T[K19], T[K20]];
+  public get<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T, K12 extends keyof T, K13 extends keyof T, K14 extends keyof T, K15 extends keyof T, K16 extends keyof T, K17 extends keyof T, K18 extends keyof T, K19 extends keyof T, K20 extends keyof T, K21 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15, K16, K17, K18, K19, K20, K21]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11], T[K12], T[K13], T[K14], T[K15], T[K16], T[K17], T[K18], T[K19], T[K20], T[K21]];
+  public get<K extends keyof T, U extends { [name: string]: K }>(dependencies: U): { [V in keyof U]: T[U[V]]; };
+  public get<K extends keyof T>(dependencies: { [key: string]: K }) {
     if (!dependencies) {
       return null;
     }
@@ -407,6 +430,12 @@ export class Injector {
     if (this.middlewareEnabled) {
       this._runMiddleware(keys);
     }
+
+    // todo: not sure why this inference doesn't work in formatCached
+    if (isString(dependencies)) {
+      return instances[dependencies].instance;
+    }
+
     return this._formatCachedResults(dependencies);
   }
 
@@ -437,14 +466,38 @@ export class Injector {
     }
   }
 
-  private _formatCachedResults = (dependencies: IDependencies) => {
+  private _formatCachedResults<K extends keyof T>(dependencies: K): T[K];
+  private _formatCachedResults<K1 extends keyof T>(dependencies: [K1]): [T[K1]];
+  private _formatCachedResults<K1 extends keyof T, K2 extends keyof T>(dependencies: [K1, K2]): [T[K1], T[K2]];
+  private _formatCachedResults<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T>(dependencies: [K1, K2, K3]): [T[K1], T[K2], T[K3]];
+  private _formatCachedResults<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T>(dependencies: [K1, K2, K3, K4]): [T[K1], T[K2], T[K3], T[K4]];
+  private _formatCachedResults<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T>(dependencies: [K1, K2, K3, K4, K5]): [T[K1], T[K2], T[K3], T[K4], T[K5]];
+  private _formatCachedResults<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6]];
+  private _formatCachedResults<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7]];
+  private _formatCachedResults<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8]];
+  private _formatCachedResults<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9]];
+  private _formatCachedResults<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10]];
+  private _formatCachedResults<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11]];
+  private _formatCachedResults<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T, K12 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11], T[K12]];
+  private _formatCachedResults<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T, K12 extends keyof T, K13 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11], T[K12], T[K13]];
+  private _formatCachedResults<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T, K12 extends keyof T, K13 extends keyof T, K14 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11], T[K12], T[K13], T[K14]];
+  private _formatCachedResults<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T, K12 extends keyof T, K13 extends keyof T, K14 extends keyof T, K15 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11], T[K12], T[K13], T[K14], T[K15]];
+  private _formatCachedResults<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T, K12 extends keyof T, K13 extends keyof T, K14 extends keyof T, K15 extends keyof T, K16 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15, K16]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11], T[K12], T[K13], T[K14], T[K15], T[K16]];
+  private _formatCachedResults<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T, K12 extends keyof T, K13 extends keyof T, K14 extends keyof T, K15 extends keyof T, K16 extends keyof T, K17 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15, K16, K17]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11], T[K12], T[K13], T[K14], T[K15], T[K16], T[K17]];
+  private _formatCachedResults<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T, K12 extends keyof T, K13 extends keyof T, K14 extends keyof T, K15 extends keyof T, K16 extends keyof T, K17 extends keyof T, K18 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15, K16, K17, K18]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11], T[K12], T[K13], T[K14], T[K15], T[K16], T[K17], T[K18]];
+  private _formatCachedResults<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T, K12 extends keyof T, K13 extends keyof T, K14 extends keyof T, K15 extends keyof T, K16 extends keyof T, K17 extends keyof T, K18 extends keyof T, K19 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15, K16, K17, K18, K19]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11], T[K12], T[K13], T[K14], T[K15], T[K16], T[K17], T[K18], T[K19]];
+  private _formatCachedResults<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T, K12 extends keyof T, K13 extends keyof T, K14 extends keyof T, K15 extends keyof T, K16 extends keyof T, K17 extends keyof T, K18 extends keyof T, K19 extends keyof T, K20 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15, K16, K17, K18, K19, K20]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11], T[K12], T[K13], T[K14], T[K15], T[K16], T[K17], T[K18], T[K19], T[K20]];
+  private _formatCachedResults<K1 extends keyof T, K2 extends keyof T, K3 extends keyof T, K4 extends keyof T, K5 extends keyof T, K6 extends keyof T, K7 extends keyof T, K8 extends keyof T, K9 extends keyof T, K10 extends keyof T, K11 extends keyof T, K12 extends keyof T, K13 extends keyof T, K14 extends keyof T, K15 extends keyof T, K16 extends keyof T, K17 extends keyof T, K18 extends keyof T, K19 extends keyof T, K20 extends keyof T, K21 extends keyof T>(dependencies: [K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15, K16, K17, K18, K19, K20, K21]): [T[K1], T[K2], T[K3], T[K4], T[K5], T[K6], T[K7], T[K8], T[K9], T[K10], T[K11], T[K12], T[K13], T[K14], T[K15], T[K16], T[K17], T[K18], T[K19], T[K20], T[K21]];
+  private _formatCachedResults<K extends keyof T, U extends { [name: string]: K }>(dependencies: U): { [V in keyof U]: T[U[V]]; };
+  private _formatCachedResults<K extends keyof T>(dependencies: { [key: string]: K }) {
     const { instances } = this;
-    if (Array.isArray(dependencies)) {
-      return dependencies.map((x: string) => instances[x].instance);
-    }
 
     if (isString(dependencies)) {
       return instances[dependencies].instance;
+    }
+
+    if (Array.isArray(dependencies)) {
+      return dependencies.map((x: string) => instances[x].instance);
     }
 
     return Object.entries(dependencies).reduce((result, [key, name]) => {
