@@ -10,7 +10,7 @@
         "listEmittedFiles": false,
         "module": "commonjs",
         "moduleResolution": "node",
-        "noUnusedLocals": true,
+        "noUnusedLocals": false,
         "outDir": "dist",
         "pretty": true,
         "removeComments": true,
