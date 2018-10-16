@@ -1,4 +1,3 @@
-'use strict';
 
 import expect from 'expect';
 import sinon, { SinonSandbox, SinonStubbedInstance } from 'sinon';

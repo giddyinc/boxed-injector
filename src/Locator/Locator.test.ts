@@ -1,11 +1,7 @@
-'use strict';
 
 import expect from 'expect';
 import { Injector } from '../Injector/Injector';
-import {
-  get,
-  set
-} from './Locator';
+import { get, set, isRegistered } from './Locator';
 
 /**
  * to run standalone:
@@ -37,4 +33,33 @@ describe('Locator', () => {
     const another = require('./Locator');
     expect(another.get() instanceof Injector).toBe(true, 'separate require not working');
   });
+
+  it('map implementation - support multiple injectors', () => {
+    const Locator = require('./Locator');
+    const injector = Locator.get();
+    const second = new Injector();
+    const key = 'second';
+    expect(isRegistered()).toBe(true);
+    expect(isRegistered(key)).toBe(false);
+    Locator.set(key, second);
+    expect(isRegistered(key)).toBe(true);
+    expect(injector === second).toBe(false);
+    (() => {
+      const injector = Locator.get();
+      const second = Locator.get('second'); 
+      second.register('foo', 'baz');
+      expect(injector === second).toBe(false);
+      expect(isRegistered()).toBe(true);
+      expect(isRegistered(key)).toBe(true);
+      expect(isRegistered('third')).toBe(false);
+    })();
+  });
+
+  it('getType', () => {
+    injector.register('foo', 'bar');
+    const Locator = require('./Locator');
+    expect(Locator.getType('foo')).toEqual('bar');
+    expect(Locator.getType('second', 'foo')).toEqual('baz');
+  });
+
 });
