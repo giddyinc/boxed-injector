@@ -1,6 +1,4 @@
 
-'use strict';
-
 import expect from 'expect';
 import { Injector, Locator, inject } from '../src';
 
