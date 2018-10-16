@@ -78,6 +78,14 @@ const Locator = require('boxed-injector').Locator;
 Locator.set(injector);
 injector = Locator.get();
 
+// dictionary api allows you to store multiple injectors in the locator by key.
+const otherInjector = new Injector();
+Locator.set('second', otherInjector)
+
+(() => {
+  const otherInjector = Locator.get('second');
+})();
+
 const sameCarFactory = injector.get('CarFactory');
 
 console.log(sameCarFactory);
@@ -85,6 +93,15 @@ console.log(carFactory === sameCarFactory);
 
 // injector.get('whatever');
 
+// get type from the locator directly
+(() => {
+  const carFactory = Locator.getType('CarFactory');
+})();
+
+// get type from a different locator via dictionary api
+(() => {
+  const carFactory = Locator.getType('second', 'CarFactory');
+})();
 
 ```
 ## Create
