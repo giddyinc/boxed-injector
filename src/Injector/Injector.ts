@@ -422,18 +422,23 @@ export class Injector {
   }
 
   private _constructFromCachedResults<T = any>(factory: IFactory, results): IInstance<T> {
-    if (isFunctionalFactory(factory)) {
-      const { factory: Factory } = factory;
-      if (Array.isArray(results)) {
-        return Factory(...results);
+    try {
+      if (isFunctionalFactory(factory)) {
+        const { factory: Factory } = factory;
+        if (Array.isArray(results)) {
+          return Factory(...results);
+        }
+        return Factory(results);
+      } else if (isConstructorFactory(factory)) {
+        const { factory: Factory } = factory;
+        if (Array.isArray(results)) {
+          return new Factory(...results);
+        }
+        return new Factory(results);
       }
-      return Factory(results);
-    } else if (isConstructorFactory(factory)) {
-      const { factory: Factory } = factory;
-      if (Array.isArray(results)) {
-        return new Factory(...results);
-      }
-      return new Factory(results);
+    } catch (e) {
+      console.error('Error instantiating', JSON.stringify(factory));
+      throw e;
     }
   }
 
